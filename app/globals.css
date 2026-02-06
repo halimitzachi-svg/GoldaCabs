@@ -1,31 +1,130 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand Colors */
+  /* Brand Colors - Metallic Gold */
   --gold-primary: #D4AF37;
-  --gold-hover: #B5952F;
-  --dark-bg: #0F0F0F;
-  --dark-surface: #1A1A1A;
-  
+  --gold-light: #F4E085;
+  --gold-dark: #AA8C2C;
+  --gold-gradient: linear-gradient(135deg, #FFD700 0%, #D4AF37 100%);
+
+  /* Dark Mode Palette */
+  --dark-bg: #050505;
+  --dark-surface: #121212;
+  --dark-border: #2A2A2A;
+
   /* Base Colors */
-  --background: #0F0F0F;
-  --foreground: #EDEDED;
+  --background: var(--dark-bg);
+  --foreground: #F5F5F5;
+
+  /* UI Accents */
+  --glass-bg: rgba(20, 20, 20, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
   --color-gold: var(--gold-primary);
-  --color-gold-hover: var(--gold-hover);
+  --color-gold-light: var(--gold-light);
+  --color-gold-dark: var(--gold-dark);
   --color-surface: var(--dark-surface);
-  
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Customs for Tailwind v4 */
+  --animate-fade-in: fadeIn 0.5s ease-out forwards;
+  --animate-slide-up: slideUp 0.5s ease-out forwards;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Utilities */
+.text-gradient-gold {
+  background: linear-gradient(to right, #F4E085, #D4AF37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-gold-gradient {
+  background: var(--gold-gradient);
+}
+
+.text-glow-gold {
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.5), 0 0 40px rgba(212, 175, 55, 0.3);
+}
+
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Accessibility Overrides */
+html.high-contrast {
+  filter: contrast(130%) brightness(110%);
+}
+
+html.high-contrast * {
+  background: white !important;
+  color: black !important;
+  border-color: black !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+html.high-contrast img,
+html.high-contrast video {
+  filter: grayscale(100%);
+  background: none !important;
+}
+
+html.large-text {
+  font-size: 110%;
+}
+
+html.large-text h1 {
+  font-size: 2.5rem;
+}
+
+html.large-text h2 {
+  font-size: 2rem;
+}
+
+html.large-text p {
+  font-size: 1.2rem;
 }

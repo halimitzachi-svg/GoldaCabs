@@ -6,9 +6,48 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  output   = "../generated/client"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Client Details
+  name      String
+  phone     String
+  email     String?
+  
+  // Trip Details
+  origin      String
+  destination String
+  pickupTime  DateTime
+  passengers  Int      @default(1)
+  luggage     Int      @default(0)
+  flightNum   String?
+  
+  // Business Logic
+  distanceKm  Float?   // Calculated distance
+  durationMin Int?     // Calculated duration
+  
+  // Status & Management
+  quotedPrice Float?
+  status      Status   @default(NEW)
+  
+  notes       String?
+}
+
+enum Status {
+  NEW
+  CONTACTED
+  OFFER_SENT
+  BOOKED
+  COMPLETED
+  CANCELLED
 }

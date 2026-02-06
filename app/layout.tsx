@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Footer from "@/components/Footer";
+import AccessibilityWidget from "@/components/AccessibilityWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GoldaCabs | מונית VIP לנתב\"ג",
+  title: "מוניות גולדה | מוניות לנתב\"ג VIP",
   description: "שירות הסעות יוקרתי לנתב\"ג. נהג אישי, מחיר קבוע ואמינות ללא פשרות.",
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  }
 };
 
 export default function RootLayout({
@@ -28,6 +35,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Footer />
+        <AccessibilityWidget />
       </body>
     </html>
   );

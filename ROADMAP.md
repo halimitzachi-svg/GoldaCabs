@@ -8,27 +8,27 @@
 - [ ] Database Schema Design (Drivers, Rides, Leads)
 
 ## Phase 2: Core Features
-- [ ] **Home Page (Hero Section)**
-  - [ ] High-impact personal branding (Father & Car)
-  - [ ] "Call to Action" buttons
-- [ ] **Smart Price Calculator**
-  - [ ] Google Maps Places Autocomplete integration
-  - [ ] Dynamic pricing logic (Distance, Time, Passengers)
-  - [ ] Other: Real-time price display
-  - [ ] **Smart Flight Input:** Detect airline code (LY, BA) -> Show Logo + Validate format (mock logic)
+- [x] **Home Page (Hero Section)**
+  - [x] High-impact personal branding (Video Background)
+  - [x] "Call to Action" buttons
+- [x] **Smart Price Calculator**
+  - [x] Google Maps Places Autocomplete integration
+  - [x] Dynamic pricing logic (Distance, Time, Passengers)
+  - [x] Multilingual Support (HE/EN)
+  - [ ] **Smart Flight Input:** Detect airline code (LY, BA) -> Show Logo
 - [ ] **Lead Management System (Admin)**
   - [ ] Dashboard for viewing incoming leads
-  - [ ] "Dispatch to Driver" feature (WhatsApp Deep Link generation)
+  - [ ] "Dispatch to Driver" feature
   - [ ] Commission tracking (Basic)
 
 ## Phase 3: Trust & Content (SEO)
-- [ ] **Dynamic City Pages** (`/taxi-to-ben-gurion/[city]`)
-- [ ] **Blog/Resources Section** (Markdown/MDX based)
+- [x] **Dynamic City Pages** (`/taxi-[city]`, `/en/taxi-[city]`)
+- [ ] **Blog/Resources Section**
 - [ ] **Reviews Integration** (Google Business Profile)
 - [ ] **Interactive Checklist** for travelers
 
 ## Phase 4: Polish & Launch
-- [ ] Performance Optimization (Lighthouse 100)
+- [x] Performance Optimization (Video WebM + WebP Poster)
 - [ ] Mobile Responsiveness Audit
-- [ ] SEO Meta Tags & Structured Data (JSON-LD)
+- [x] SEO Meta Tags & Structured Data (JSON-LD)
 - [ ] Final Deployment (Vercel/Netlify)

@@ -1,59 +1,90 @@
-'use client';
-import { motion } from "framer-motion";
-import { Phone, Star } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShieldCheck, Star, Clock } from "lucide-react";
 import PriceCalculator from "./PriceCalculator";
+import { dictionary, Locale } from '@/lib/dictionary';
 
-export default function Hero() {
+export default function Hero({ lang = 'he' }: { lang?: Locale }) {
+    const t = dictionary[lang].hero;
+    const isRTL = lang === 'he';
+
     return (
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-20 lg:py-0">
-            {/* Background Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-dark-bg via-surface to-black z-0" />
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-20">
 
-            {/* Dynamic Grid Background */}
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#D4AF37_1px,transparent_1px)] [background-size:16px_16px] z-0 pointer-events-none" />
+            {/* Video Background with Enhanced Fade */}
+            <div className="absolute inset-x-0 top-0 h-[85vh] overflow-hidden pointer-events-none">
+                <div className="relative w-full h-full">
 
-            <div className="container mx-auto px-4 z-10 relative">
-                <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+                    {/* Stronger Dark Overlay for Text Visibility */}
+                    <div className="absolute inset-0 bg-black/70 z-10" />
+                    <div className="absolute inset-0 bg-dark-bg/50 z-10 mix-blend-multiply" />
+
+                    {/* Smoother, Taller Bottom Gradient mask */}
+                    <div className="absolute inset-x-0 bottom-0 h-[50vh] bg-gradient-to-t from-dark-bg via-dark-bg/90 to-transparent z-20" />
+
+                    {/* The Video (Standard HTML5) */}
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                        poster="/hero-poster.webp"
+                    >
+                        <source src="/hero-video.webm" type="video/webm" />
+                    </video>
+                </div>
+
+                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#D4AF37_1px,transparent_1px)] [background-size:16px_16px] z-10" />
+            </div>
+
+            <div className="container mx-auto px-4 relative z-10">
+                <div className="grid lg:grid-cols-2 gap-12 items-center">
 
                     {/* Text Content */}
-                    <motion.div
-                        className="flex-1 text-center lg:text-right"
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gold/30 bg-gold/10 text-gold mb-6">
-                            <Star className="w-4 h-4 fill-gold" />
-                            <span className="text-sm font-medium">שירות ה-VIP שלך לנתב"ג</span>
+                    <div className="space-y-8 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm animate-fade-in mx-auto">
+                            <Star className="w-4 h-4 text-gold fill-gold" />
+                            <span className="text-sm font-medium text-gold">Premium Taxi Service</span>
                         </div>
 
-                        <h1 className="text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400 mb-6 font-sans leading-tight">
-                            Golda<span className="text-gold">Cabs</span>
+                        <h1 className="text-5xl md:text-7xl font-bold leading-tight text-white">
+                            {t.title.split(' ').map((word, i) => (
+                                i === 1 ? <span key={i} className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-white to-gold block text-glow-gold">{word} </span> : word + ' '
+                            ))}
                         </h1>
 
-                        <p className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed font-light max-w-2xl mx-auto lg:mx-0">
-                            הדרך הבטוחה, השקופה והיוקרתית להגיע לטיסה שלך.
-                            <br />
-                            <span className="text-white/80 font-normal">נהג אישי. מחיר קבוע. אפס הפתעות.</span>
+                        <p className="text-xl text-gray-400 max-w-lg leading-relaxed mx-auto">
+                            {t.subtitle}
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                            <button className="border border-white/20 text-white px-8 py-4 rounded-xl font-medium text-lg hover:bg-white/10 transition-all cursor-pointer flex items-center justify-center gap-2 backdrop-blur-sm">
-                                <Phone className="w-6 h-6" />
-                                דבר עם נהג (Whatsapp)
+                        <div className="flex flex-wrap gap-4 justify-center">
+                            <button className="bg-gold hover:bg-gold-hover text-dark-bg px-8 py-4 rounded-xl font-bold text-lg transition-all flex items-center gap-2 group">
+                                {t.cta}
+                                {isRTL ?
+                                    <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" /> :
+                                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                                }
                             </button>
                         </div>
-                    </motion.div>
+
+                        <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
+                            {[
+                                { icon: ShieldCheck, label: isRTL ? "נהגים מורשים" : "Licensed Drivers" },
+                                { icon: Clock, label: isRTL ? "דיוק בזמנים" : "Punctuality" },
+                                { icon: Star, label: isRTL ? "שירות VIP" : "VIP Service" }
+                            ].map((item, index) => (
+                                <div key={index} className="flex flex-col items-center gap-2">
+                                    <item.icon className="w-6 h-6 text-gold/80" />
+                                    <span className="text-sm text-gray-400 font-medium">{item.label}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
                     {/* Calculator Card */}
-                    <motion.div
-                        className="flex-1 w-full max-w-lg"
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                    >
-                        <PriceCalculator />
-                    </motion.div>
+                    <div className="relative">
+                        <div className="absolute -inset-1 bg-gold-gradient rounded-3xl opacity-20 blur-xl"></div>
+                        <PriceCalculator lang={lang} />
+                    </div>
                 </div>
             </div>
         </section>
