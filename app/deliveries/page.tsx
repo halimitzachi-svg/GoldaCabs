@@ -4,8 +4,14 @@ import { dictionary } from "@/lib/dictionary";
 import Link from "next/link";
 
 export const metadata = {
-    title: 'משלוחים במונית אקספרס | מוניות גולדה',
-    description: 'שירות משלוחים מהיר ובטוח במונית לכל חלקי הארץ. איסוף תוך 15 דקות, מסירה מדלת לדלת ומחירים הוגנים.',
+    title: 'משלוחים במונית אקספרס מהיום להיום | מוניות גולדה',
+    description: 'צריכים משלוח דחוף? מוניות גולדה מציעים שירות משלוחי אקספרס במונית לכל הארץ. איסוף מהיר, מסירה בטוחה ומחיר קבוע 24/7.',
+    keywords: ['משלוח במונית', 'שליחויות אקספרס', 'משלוח חבילה דחוף', 'שירות משלוחים במוניות', 'משלוחי מסמכים'],
+    openGraph: {
+        title: 'משלוחי אקספרס במונית - מוניות גולדה',
+        description: 'הדרך המהירה והבטוחה ביותר למשלוח מהיום להיום.',
+        type: 'website',
+    }
 };
 
 export default function DeliveriesPage() {
@@ -30,7 +36,7 @@ export default function DeliveriesPage() {
                     </p>
                     <div className="pt-4">
                         <a
-                            href="https://wa.me/972547438110?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%94%D7%9E%D7%97%20%D7%9C%D7%94%D7%96%D7%9F%20%D7%9E%D7%A9%D7%9C%D7%95%D7%97%20%D7%90%D7%A7%D7%A1%D7%A4%D7%A8%D7%A1"
+                            href="https://wa.me/972547438110?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%94%D7%96%D7%9E%D7%99%D7%9F%20%D7%9E%D7%A9%D7%9C%D7%95%D7%97%20%D7%90%D7%A7%D7%A1%D7%A4%D7%A8%D7%A1"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-3 bg-gold hover:bg-gold-dark text-black px-10 py-5 rounded-2xl font-bold text-lg transition-all shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:scale-105 active:scale-95"
