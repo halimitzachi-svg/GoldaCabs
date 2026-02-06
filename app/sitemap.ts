@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { CITIES } from '@/lib/cities';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://goldacabs.com';
+    const baseUrl = 'https://www.goldacabs.co.il';
 
     // Basic pages
     const routes = [

@@ -12,11 +12,11 @@ export const metadata: Metadata = {
     type: 'website',
   },
   alternates: {
-    canonical: 'https://goldacabs.com',
+    canonical: 'https://www.goldacabs.co.il',
     languages: {
-      'he-IL': 'https://goldacabs.com',
-      'en-IL': 'https://goldacabs.com/en',
-      'en': 'https://goldacabs.com/en',
+      'he-IL': 'https://www.goldacabs.co.il',
+      'en-IL': 'https://www.goldacabs.co.il/en',
+      'en': 'https://www.goldacabs.co.il/en',
     },
   }
 };
@@ -26,9 +26,9 @@ export default function Home() {
     '@context': 'https://schema.org',
     '@type': 'TaxiService',
     'name': 'מוניות גולדה',
-    'image': 'https://goldacabs.com/og-image.jpg',
+    'image': 'https://www.goldacabs.co.il/og-image.jpg',
     'description': 'שירות מוניות ספיישל לנתב"ג ולכל חלקי הארץ. רכבים מפוארים, נהגים אדיבים ומחירים הוגנים.',
-    'telephone': '+972-50-123-4567',
+    'telephone': '+972-54-743-8110',
     'areaServed': [
       { '@type': 'City', 'name': 'Tel Aviv-Yafo' },
       { '@type': 'City', 'name': 'Raanana' },
