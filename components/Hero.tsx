@@ -57,13 +57,18 @@ export default function Hero({ lang = 'he' }: { lang?: Locale }) {
                         </p>
 
                         <div className="flex flex-wrap gap-4 justify-center">
-                            <button className="bg-gold hover:bg-gold-hover text-dark-bg px-8 py-4 rounded-xl font-bold text-lg transition-all flex items-center gap-2 group">
+                            <a
+                                href={`https://wa.me/972547438110?text=${encodeURIComponent(isRTL ? "היי מוניות גולדה, אשמח להזמין מונית" : "Hi Golda Cabs, I'd like to book a taxi")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-gold hover:bg-gold-hover text-dark-bg px-8 py-4 rounded-xl font-bold text-lg transition-all flex items-center gap-2 group shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+                            >
                                 {t.cta}
                                 {isRTL ?
                                     <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" /> :
                                     <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                                 }
-                            </button>
+                            </a>
                         </div>
 
                         <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">

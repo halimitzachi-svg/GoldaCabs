@@ -175,7 +175,7 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                 .replace('{6}', price.toString());
 
             const encodedMessage = encodeURIComponent(message);
-            window.open(`https://wa.me/972501234567?text=${encodedMessage}`, '_blank');
+            window.open(`https://wa.me/972547438110?text=${encodedMessage}`, '_blank');
 
         } catch (error) {
             console.error(error);
