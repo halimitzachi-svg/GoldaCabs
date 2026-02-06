@@ -53,6 +53,16 @@ export const dictionary = {
             availability: "זמינות 24/7",
             large_taxis: "מוניות גדולות למשפחות",
             faq_title: "שאלות נפוצות",
+        },
+        deliveries: {
+            title: "משלוחי אקספרס במונית",
+            subtitle: "שירות משלוחים מהיר מהיום להיום לכל חלקי הארץ. איסוף מיידי, רכב פרטי מאובטח, ומחירים קבועים.",
+            cta: "הזמן משלוח עכשיו",
+            benefit1: "איסוף תוך 15 דקות",
+            benefit2: "מסירה מדלת לדלת",
+            benefit3: "ביטוח מלא למשלוח",
+            why_title: "למה לבחור במוניות גולדה למשלוחים?",
+            why_desc: "בניגוד לשליח על קטנוע, במונית המשלוח שלך מוגן מחום, גשם וטלטלות. אנחנו מבטיחים הגעה מהירה ובטוחה של חבילות, מסמכים חשובים וציוד רגיש.",
         }
     },
     en: {
@@ -107,6 +117,16 @@ Website Price: {6}ILS`
             availability: '24/7 Availability',
             large_taxis: 'Large Vans Available',
             faq_title: 'Frequently Asked Questions',
+        },
+        deliveries: {
+            title: "Express Taxi Deliveries",
+            subtitle: "Fast same-day delivery service across Israel. Immediate pickup, secure private vehicle, and fixed prices.",
+            cta: "Book Delivery Now",
+            benefit1: "Pickup in 15 Min",
+            benefit2: "Door-to-Door",
+            benefit3: "Fully Secured",
+            why_title: "Why use Golda Cabs for deliveries?",
+            why_desc: "Unlike bike couriers, your delivery is shielded from heat, rain, and bumps. We guarantee fast and safe arrival for packages, documents, and sensitive equipment.",
         }
     }
 };

@@ -37,6 +37,9 @@ export default function Footer() {
 
                     {/* Links */}
                     <div className="flex gap-6">
+                        <Link href="/deliveries" className="hover:text-gold transition-colors font-medium">
+                            משלוחים במונית
+                        </Link>
                         <Link href="/legal" className="hover:text-gold transition-colors">
                             תנאי שימוש ופרטיות / Legal
                         </Link>
