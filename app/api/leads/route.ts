@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma-client';
+import { PrismaClient } from '@prisma/client';
 
 // Best practice: Use a global Prisma instance to prevent connection exhaustion in dev
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
