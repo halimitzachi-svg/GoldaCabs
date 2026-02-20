@@ -1,4 +1,6 @@
 import Hero from "@/components/Hero";
+import Testimonials from "@/components/Testimonials";
+import FAQ from "@/components/FAQ";
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -12,11 +14,11 @@ export const metadata: Metadata = {
         type: 'website',
     },
     alternates: {
-        canonical: 'https://goldacabs.com/en',
+        canonical: 'https://www.goldacabs.co.il/en',
         languages: {
-            'he-IL': 'https://goldacabs.com',
-            'en-IL': 'https://goldacabs.com/en',
-            'en': 'https://goldacabs.com/en',
+            'he-IL': 'https://www.goldacabs.co.il',
+            'en-IL': 'https://www.goldacabs.co.il/en',
+            'en': 'https://www.goldacabs.co.il/en',
         },
     }
 };
@@ -26,16 +28,17 @@ export default function HomeEn() {
         '@context': 'https://schema.org',
         '@type': 'TaxiService',
         'name': 'GoldaCabs',
-        'image': 'https://goldacabs.com/og-image.jpg',
+        'url': 'https://www.goldacabs.co.il/en',
+        'image': 'https://www.goldacabs.co.il/og-image.jpg',
         'description': 'Premium taxi service to Ben Gurion Airport and across Israel. Luxury cars, English speaking drivers.',
-        'telephone': '+972-50-123-4567',
+        'telephone': '+972-54-743-8110',
         'areaServed': [
             { '@type': 'City', 'name': 'Tel Aviv-Yafo' },
             { '@type': 'City', 'name': 'Raanana' },
             { '@type': 'City', 'name': 'Herzliya' },
             { '@type': 'City', 'name': 'Jerusalem' }
         ],
-        'priceRange': '$$',
+        'priceRange': '₪₪',
         'openingHoursSpecification': {
             '@type': 'OpeningHoursSpecification',
             'dayOfWeek': [
@@ -55,6 +58,8 @@ export default function HomeEn() {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
             <Hero lang="en" />
+            <Testimonials lang="en" />
+            <FAQ lang="en" />
         </main>
     );
 }

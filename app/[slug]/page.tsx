@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Hero from '@/components/Hero';
 import { Plane, Clock, CheckCircle2, Shield, MapPin } from 'lucide-react';
+import Link from 'next/link';
 import { dictionary } from '@/lib/dictionary';
 import { CITIES } from '@/lib/cities';
 
@@ -82,7 +83,7 @@ export default async function CityPage({ params }: Props) {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
 
-            <Hero />
+            <Hero lang="he" isSubPage={true} />
 
             <section className="py-20 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-1/3 h-full bg-gold/5 blur-[120px] -z-10" />
@@ -124,24 +125,74 @@ export default async function CityPage({ params }: Props) {
                                 תושבי {cityData.name} כבר יודעים - הדרך הכי טובה להתחיל את החופשה היא עם מוניות גולדה.
                                 אנחנו מציעים שירות הסעות פרימיום מכל שכונות {cityData.name} ישירות לשדה התעופה בן גוריון.
                                 <br /><br />
-                                הנהגים שלנו מכירים היטב את כבישי {cityData.name} ואת דרכי הגישה המהירות ביותר, כדי להבטיח שתגיעו לטיסה בזמן, ברוגע ובנוחות מקסימלית.
+                                הנהגים שלנו הם תושבי האזור, מכירים היטב את כבישי {cityData.name} ואת דרכי הגישה המהירות ביותר (כולל נתיבים מהירים וכבישי אגרה במידת הצורך), כדי להבטיח שתגיעו לטיסה בזמן, ברוגע ובנוחות מקסימלית.
                             </p>
 
-                            <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
-                                <CheckCircle2 className="text-gold w-5 h-5" />
-                                זמינות 24/7 ב{cityData.name}
-                            </h3>
-                            <p className="text-gray-400 mb-6">
-                                לא משנה אם הטיסה שלכם ממריאה באמצע הלילה או בשיא הפקקים של הבוקר, המוניות שלנו ב{cityData.name} זמינות עבורכם מסביב לשעון.
-                            </p>
+                            <div className="grid md:grid-cols-2 gap-8 my-10">
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                        <CheckCircle2 className="text-gold w-5 h-5" />
+                                        ביטחון ובטיחות מעל הכל
+                                    </h3>
+                                    <p className="text-gray-400">
+                                        כל הרכבים בצי שלנו חדישים, נקיים ומתוחזקים ברמה הגבוהה ביותר. בנסיעה מ{cityData.name} לנתב"ג, הבטיחות שלכם היא העסק שלנו.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                        <CheckCircle2 className="text-gold w-5 h-5" />
+                                        זמינות 24/7 ב{cityData.name}
+                                    </h3>
+                                    <p className="text-gray-400">
+                                        לא משנה אם הטיסה שלכם ממריאה באמצע הלילה או בשיא הפקקים של הבוקר, המוניות שלנו ב{cityData.name} זמינות עבורכם מסביב לשעון.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                        <CheckCircle2 className="text-gold w-5 h-5" />
+                                        שירות לכיסאות בטיחות
+                                    </h3>
+                                    <p className="text-gray-400">
+                                        נוסעים עם ילדים מ{cityData.name}? ניתן להזמין מראש בוסטר או כיסא בטיחות כדי שהקטנטנים יסעו בביטחון מלא.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                        <CheckCircle2 className="text-gold w-5 h-5" />
+                                        עמידה בלוחות זמנים
+                                    </h3>
+                                    <p className="text-gray-400">
+                                        אנחנו יודעים כמה הלחץ שלפני טיסה יכול להיות מעיק. הנהגים שלנו ב{cityData.name} מקפידים להגיע כמה דקות לפני הזמן שנקבע.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="bg-gold/10 p-6 rounded-2xl border border-gold/20 my-8">
+                                <h3 className="text-xl font-bold text-gold mb-4 text-center">מחירון משוער ממוצע: {cityData.name} - נתב"ג</h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between border-b border-gold/10 pb-2">
+                                        <span>מונית ספיישל (עד 4 נוסעים)</span>
+                                        <span className="font-bold">החל מ-{cityData.price}₪</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-gold/10 pb-2">
+                                        <span>תוספת מזוודה</span>
+                                        <span className="font-bold">10₪ ליחידה</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-gold/10 pb-2">
+                                        <span>נסיעת לילה / שבת</span>
+                                        <span className="font-bold">תעריף ב' (כ-25% תוספת)</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="mt-12 space-y-4">
+                        <div className="mt-16 space-y-4">
                             <h2 className="text-3xl font-bold text-center mb-8">שאלות נפוצות על הסעות מ{cityData.name} לנתב"ג</h2>
 
                             {[
                                 { q: `כמה עולה מונית מ${cityData.name} לנתב"ג?`, a: `המחיר לנסיעה מ${cityData.name} לנתב"ג מתחיל ב-${cityData.price}₪ לנסיעה רגילה בשעות היום. המחיר עשוי להשתנות בהתאם לשעות הלילה (תעריף ב'), כמות הנוסעים והמזוודות. מומלץ להשתמש במחשבון באתר לקבלת מחיר מדויק.` },
                                 { q: `כמה זמן מראש צריך להזמין מונית מ${cityData.name}?`, a: `אנו ממליצים להזמין מונית כ-24 שעות מראש, במיוחד בעונות התיירות העמוסות. עם זאת, במוניות גולדה אנו ערוכים גם לקריאות מיידיות מ${cityData.name} בכפוף לזמינות.` },
+                                { q: `כיצד ניתן לשלם עבור הנסיעה?`, a: `אנו מקבלים תשלום במגוון אמצעים: במזומן, באפליקציית Bit ו-Paybox, מה שמאפשר לכם גמישות מקסימלית ותהליך תשלום פשוט ונוח.` },
                                 { q: `האם יש לכם נהגים דוברי אנגלית ב${cityData.name}?`, a: `כן, רבים מהנהגים שלנו ב${cityData.name} דוברים אנגלית ושפות נוספות, ומורגלים במתן שירות לתיירים ואנשי עסקים.` }
                             ].map((faq, idx) => (
                                 <details key={idx} className="group bg-surface border border-white/5 rounded-xl">
@@ -156,6 +207,25 @@ export default async function CityPage({ params }: Props) {
                                     </div>
                                 </details>
                             ))}
+                        </div>
+
+                        {/* Nearby Cities - Internal Linking SEO Powerhouse */}
+                        <div className="mt-20 pt-12 border-t border-white/5">
+                            <h3 className="text-2xl font-bold mb-8 text-center text-gold">שירות מוניות ביישובים נוספים בסביבה</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {Object.entries(CITIES)
+                                    .filter(([key, entry]) => entry.he.region === cityData.region && entry.he.name !== cityData.name)
+                                    .slice(0, 12)
+                                    .map(([key, entry]) => (
+                                        <Link
+                                            key={key}
+                                            href={`/taxi-${key}`}
+                                            className="bg-white/5 border border-white/10 p-4 rounded-xl text-center text-sm hover:border-gold/50 hover:bg-gold/5 transition-all text-gray-300 hover:text-gold"
+                                        >
+                                            מונית מ{entry.he.name}
+                                        </Link>
+                                    ))}
+                            </div>
                         </div>
 
                     </div>

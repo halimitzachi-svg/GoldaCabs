@@ -29,6 +29,7 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
     const [price, setPrice] = useState(0);
     const [flightNumber, setFlightNumber] = useState('');
     const [useRoute6, setUseRoute6] = useState(false);
+    const [babySeat, setBabySeat] = useState(false);
     const [breakdown, setBreakdown] = useState<any>(null);
     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
@@ -36,6 +37,7 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errors, setErrors] = useState<{ origin?: string; name?: string; phone?: string }>({});
 
     // Initialize default flight time to tomorrow 10:00 AM
     useEffect(() => {
@@ -76,8 +78,8 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
             origins: [originLocation],
             destinations: [tlvLocation],
             travelMode: google.maps.TravelMode.DRIVING,
-        }, (response, status) => {
-            if (status === 'OK' && response) {
+        }, (response: google.maps.DistanceMatrixResponse | null, status: google.maps.DistanceMatrixStatus) => {
+            if (status === 'OK' && response && response.rows[0].elements[0].distance) {
                 const distance = response.rows[0].elements[0].distance.value / 1000; // in km
                 setDistanceKm(distance);
             }
@@ -116,8 +118,9 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
         const luggageFee = Math.max(0, luggage - 1) * PRICING_CONSTANTS.SUITCASE_PRICE;
         const vehicleSurcharge = passengers > 4 ? PRICING_CONSTANTS.PASSENGER_SURCHARGE_AMOUNT : 0;
         const route6Fee = useRoute6 ? PRICING_CONSTANTS.ROUTE_6_PRICE : 0;
+        const babySeatFee = babySeat ? PRICING_CONSTANTS.BABY_SEAT_PRICE : 0;
 
-        let total = startPrice + distancePrice + airportFee + luggageFee + vehicleSurcharge + route6Fee;
+        let total = startPrice + distancePrice + airportFee + luggageFee + vehicleSurcharge + route6Fee + babySeatFee;
 
         // Round up to nearest 10
         total = Math.ceil(total / 10) * 10;
@@ -130,60 +133,52 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
             luggage: luggageFee,
             vehicle: vehicleSurcharge,
             route6: route6Fee,
+            babySeat: babySeatFee,
             tariff: tariffType
         });
 
-    }, [distanceKm, passengers, luggage, flightTime, useRoute6]);
+    }, [distanceKm, passengers, luggage, flightTime, useRoute6, babySeat]);
 
-    const handleBooking = async () => {
-        if (!name || !phone) {
-            alert(t.error_details);
+    const handleBooking = () => {
+        const newErrors: { origin?: string; name?: string; phone?: string } = {};
+
+        // Basic Validation
+        if (!originName || originName.length < 3) {
+            newErrors.origin = lang === 'he' ? 'נא לבחור כתובת איסוף מהרשימה' : 'Please select a pickup address';
+        }
+
+        if (!name || name.trim().length < 2) {
+            newErrors.name = lang === 'he' ? 'שם קצר מדי' : 'Name is too short';
+        }
+
+        // Phone validation (Israeli format 05... or international with +)
+        const phoneRegex = /^(?:05[0-9]{8}|\+?[1-9][0-9]{7,14})$/;
+        if (!phone || !phoneRegex.test(phone.replace(/[-\s]/g, ''))) {
+            newErrors.phone = lang === 'he' ? 'מספר טלפון לא תקין' : 'Invalid phone number';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
             return;
         }
 
+        setErrors({});
         setIsSubmitting(true);
 
-        try {
-            // 1. Save Lead to DB
-            const response = await fetch('/api/leads', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name,
-                    phone,
-                    origin: originName,
-                    flightTime,
-                    passengers,
-                    luggage,
-                    flightNum: flightNumber,
-                    price,
-                    lang // Save language of lead
-                })
-            });
+        const message = t.whatsapp_msg
+            .replace('{0}', name)
+            .replace('{1}', originName)
+            .replace('{2}', flightTime.replace('T', ' '))
+            .replace('{3}', flightNumber || '-')
+            .replace('{4}', passengers.toString())
+            .replace('{5}', luggage.toString())
+            .replace('{6}', price.toString())
+            .replace('{7}', babySeat ? (lang === 'he' ? 'כן' : 'Yes') : (lang === 'he' ? 'לא' : 'No'));
 
-            if (!response.ok) throw new Error('Failed to save lead');
+        const encodedMessage = encodeURIComponent(message);
+        window.open(`https://wa.me/972547438110?text=${encodedMessage}`, '_blank');
 
-            // 2. Redirect to WhatsApp
-            // Use String Format or explicit replace
-            const message = t.whatsapp_msg
-                .replace('{0}', name)
-                .replace('{1}', originName)
-                .replace('{2}', flightTime.replace('T', ' '))
-                .replace('{3}', flightNumber || '-')
-                .replace('{4}', passengers.toString())
-                .replace('{5}', luggage.toString())
-                .replace('{6}', price.toString());
-
-            const encodedMessage = encodeURIComponent(message);
-            window.open(`https://wa.me/972547438110?text=${encodedMessage}`, '_blank');
-
-        } catch (error) {
-            console.error(error);
-            // Fallback redirect
-            window.open(`https://wa.me/972501234567`, '_blank');
-        } finally {
-            setIsSubmitting(false);
-        }
+        setIsSubmitting(false);
     };
 
     return (
@@ -214,7 +209,8 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                                 <input
                                     type="text"
                                     placeholder={t.pickup_placeholder}
-                                    className={`w-full bg-dark-bg/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-gold/50 outline-none placeholder:text-gray-600 ${isRTL ? 'pl-10' : 'pr-10'}`}
+                                    className={`w-full bg-dark-bg/50 border ${errors.origin ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:border-gold/50 outline-none placeholder:text-gray-600 ${isRTL ? 'pl-10' : 'pr-10'}`}
+                                    onChange={() => setErrors({ ...errors, origin: undefined })}
                                 />
                             </Autocomplete>
                         ) : (
@@ -225,6 +221,7 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                         )}
                         <MapPin className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 pointer-events-none ${isRTL ? 'left-4' : 'right-4'}`} />
                     </div>
+                    {errors.origin && <p className="text-red-500 text-xs mt-1">{errors.origin}</p>}
                 </div>
 
                 {/* Flight & Date Row */}
@@ -311,43 +308,70 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
 
                 {/* Personal Info Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                    <div className="relative">
-                        <input
-                            type="text"
-                            placeholder={t.full_name}
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className={`w-full bg-dark-bg/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-gold/50 outline-none placeholder:text-gray-600 ${isRTL ? 'pl-10' : 'pr-10'}`}
-                        />
-                        <User className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 ${isRTL ? 'left-3' : 'right-3'}`} />
+                    <div className="space-y-1">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder={t.full_name}
+                                value={name}
+                                onChange={(e) => {
+                                    setName(e.target.value);
+                                    setErrors({ ...errors, name: undefined });
+                                }}
+                                className={`w-full bg-dark-bg/50 border ${errors.name ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:border-gold/50 outline-none placeholder:text-gray-600 ${isRTL ? 'pl-10' : 'pr-10'}`}
+                            />
+                            <User className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 ${isRTL ? 'left-3' : 'right-3'}`} />
+                        </div>
+                        {errors.name && <p className="text-red-500 text-xs">{errors.name}</p>}
                     </div>
-                    <div className="relative">
-                        <input
-                            type="tel"
-                            placeholder={t.phone}
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            className={`w-full bg-dark-bg/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-gold/50 outline-none placeholder:text-gray-600 ${isRTL ? 'pl-10' : 'pr-10'}`}
-                        />
-                        <Phone className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 ${isRTL ? 'left-3' : 'right-3'}`} />
+                    <div className="space-y-1">
+                        <div className="relative">
+                            <input
+                                type="tel"
+                                placeholder={t.phone}
+                                value={phone}
+                                onChange={(e) => {
+                                    setPhone(e.target.value);
+                                    setErrors({ ...errors, phone: undefined });
+                                }}
+                                className={`w-full bg-dark-bg/50 border ${errors.phone ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:border-gold/50 outline-none placeholder:text-gray-600 ${isRTL ? 'pl-10' : 'pr-10'}`}
+                            />
+                            <Phone className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 ${isRTL ? 'left-3' : 'right-3'}`} />
+                        </div>
+                        {errors.phone && <p className="text-red-500 text-xs">{errors.phone}</p>}
                     </div>
                 </div>
 
                 {/* Toggles */}
-                {distanceKm > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {distanceKm > 0 && (
+                        <div
+                            onClick={() => setUseRoute6(!useRoute6)}
+                            className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${useRoute6 ? 'bg-gold/10 border-gold/40' : 'bg-dark-bg/30 border-white/5 hover:border-white/20'}`}
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className={`w-5 h-5 rounded flex items-center justify-center border ${useRoute6 ? 'bg-gold border-gold text-black' : 'border-gray-500'}`}>
+                                    {useRoute6 && <CheckCircle2 className="w-3.5 h-3.5" />}
+                                </div>
+                                <span className={`text-sm ${useRoute6 ? 'text-gold' : 'text-gray-400'}`}>{t.route6}</span>
+                            </div>
+                            <Car className={`w-4 h-4 ${useRoute6 ? 'text-gold' : 'text-gray-600'}`} />
+                        </div>
+                    )}
+
                     <div
-                        onClick={() => setUseRoute6(!useRoute6)}
-                        className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${useRoute6 ? 'bg-gold/10 border-gold/40' : 'bg-dark-bg/30 border-white/5 hover:border-white/20'}`}
+                        onClick={() => setBabySeat(!babySeat)}
+                        className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${babySeat ? 'bg-gold/10 border-gold/40' : 'bg-dark-bg/30 border-white/5 hover:border-white/20'}`}
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-5 h-5 rounded flex items-center justify-center border ${useRoute6 ? 'bg-gold border-gold text-black' : 'border-gray-500'}`}>
-                                {useRoute6 && <CheckCircle2 className="w-3.5 h-3.5" />}
+                            <div className={`w-5 h-5 rounded flex items-center justify-center border ${babySeat ? 'bg-gold border-gold text-black' : 'border-gray-500'}`}>
+                                {babySeat && <CheckCircle2 className="w-3.5 h-3.5" />}
                             </div>
-                            <span className={`text-sm ${useRoute6 ? 'text-gold' : 'text-gray-400'}`}>{t.route6}</span>
+                            <span className={`text-sm ${babySeat ? 'text-gold' : 'text-gray-400'}`}>{t.baby_seat}</span>
                         </div>
-                        <Car className={`w-4 h-4 ${useRoute6 ? 'text-gold' : 'text-gray-600'}`} />
+                        <Users className={`w-4 h-4 ${babySeat ? 'text-gold' : 'text-gray-600'}`} />
                     </div>
-                )}
+                </div>
 
                 <div className="h-px bg-white/10 w-full" />
 
@@ -377,6 +401,12 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                         <div className="flex justify-between text-xs text-gold/80">
                             <span>{t.route6_fee}</span>
                             <span>₪{PRICING_CONSTANTS.ROUTE_6_PRICE}</span>
+                        </div>
+                    )}
+                    {babySeat && (
+                        <div className="flex justify-between text-xs text-gold/80">
+                            <span>{t.baby_seat_fee}</span>
+                            <span>₪{PRICING_CONSTANTS.BABY_SEAT_PRICE}</span>
                         </div>
                     )}
                 </div>
@@ -422,7 +452,6 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                         </>
                     )}
                 </button>
-                {!name && <p className="text-xs text-center text-gray-500 mt-2">{t.error_details}</p>}
             </div>
         </div>
     );

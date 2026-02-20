@@ -78,4 +78,5 @@ export const PRICING_CONSTANTS = {
     ROUTE_6_PRICE: 35.0, // Avg toll
     PASSENGER_SURCHARGE_THRESHOLD: 4,
     PASSENGER_SURCHARGE_AMOUNT: 30.0, // For "Maxi Taxi" request
+    BABY_SEAT_PRICE: 40.0,
 };

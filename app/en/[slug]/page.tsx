@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Hero from '@/components/Hero';
 import { Plane, Clock, CheckCircle2, Shield, MapPin } from 'lucide-react';
+import Link from 'next/link';
 import { dictionary } from '@/lib/dictionary';
 import { CITIES } from '@/lib/cities';
 
@@ -91,7 +92,7 @@ export default async function CityPageEn({ params }: Props) {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
 
-            <Hero lang="en" />
+            <Hero lang="en" isSubPage={true} />
 
             <section className="py-20 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1/3 h-full bg-gold/5 blur-[120px] -z-10" />
@@ -130,26 +131,67 @@ export default async function CityPageEn({ params }: Props) {
                         <div className="prose prose-invert max-w-none text-left bg-white/5 p-8 rounded-3xl border border-white/10">
                             <h2 className="text-2xl font-bold text-gold mb-4">{t.why_us_title}</h2>
                             <p className="text-gray-300 text-lg leading-relaxed mb-6">
-                                For residents and visitors of {cityData.name}, GoldaCabs offers the most reliable way to get to Ben Gurion Airport.
+                                For residents and visitors of {cityData.name}, GoldaCabs offers the most reliable way to get to Ben Gurion Airport (TLV).
                                 <br /><br />
-                                Our drivers know the streets of {cityData.name} perfectly, ensuring you avoid traffic and get to your flight on time, every time.
+                                Our local drivers in {cityData.name} are experienced professionals who monitor flight times and traffic patterns to ensure a stress-free journey to the airport.
                             </p>
 
-                            <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
-                                <CheckCircle2 className="text-gold w-5 h-5" />
-                                {t.availability}
-                            </h3>
-                            <p className="text-gray-400 mb-6">
-                                Whether your flight is at 3 AM or during rush hour, our taxi service in {cityData.name} is available 24/7.
-                            </p>
+                            <div className="grid md:grid-cols-2 gap-8 my-10">
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                        <CheckCircle2 className="text-gold w-5 h-5" />
+                                        Safety First
+                                    </h3>
+                                    <p className="text-gray-400">
+                                        Modern, clean, and well-maintained fleet. Your safety is our priority for every ride from {cityData.name}.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                        <CheckCircle2 className="text-gold w-5 h-5" />
+                                        24/7 Service in {cityData.name}
+                                    </h3>
+                                    <p className="text-gray-400">
+                                        No matter when your flight is, we are operational around the clock to pick you up from {cityData.name}.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                        <CheckCircle2 className="text-gold w-5 h-5" />
+                                        Child Safety Seats
+                                    </h3>
+                                    <p className="text-gray-400">
+                                        Traveling with kids? Request a booster or child seat in advance for a worry-free ride from {cityData.name}.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                        <CheckCircle2 className="text-gold w-5 h-5" />
+                                        Punctuality
+                                    </h3>
+                                    <p className="text-gray-400">
+                                        We values your time. Our drivers in {cityData.name} usually arrive 5-10 minutes before the scheduled time.
+                                    </p>
+                                </div>
+                            </div>
 
-                            <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
-                                <CheckCircle2 className="text-gold w-5 h-5" />
-                                {t.large_taxis}
-                            </h3>
-                            <p className="text-gray-400">
-                                Traveling with family or extra luggage? We offer spacious vans and large taxis in {cityData.name}.
-                            </p>
+                            <div className="bg-gold/10 p-6 rounded-2xl border border-gold/20 my-8">
+                                <h3 className="text-xl font-bold text-gold mb-4 text-center">Estimated Price Guide: {cityData.name} - TLV</h3>
+                                <div className="space-y-3 font-sans">
+                                    <div className="flex justify-between border-b border-gold/10 pb-2">
+                                        <span>Standard Taxi (Up to 4 Pax)</span>
+                                        <span className="font-bold">From {cityData.price}ILS</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-gold/10 pb-2">
+                                        <span>Large Suitcase</span>
+                                        <span className="font-bold">10ILS per unit</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-gold/10 pb-2">
+                                        <span>Night/Shabbat Rate</span>
+                                        <span className="font-bold">Tariff B (~25% surcharge)</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* FAQ Section */}
@@ -159,6 +201,7 @@ export default async function CityPageEn({ params }: Props) {
                             {[
                                 { q: `How much is a taxi from ${cityData.name} to Ben Gurion Airport?`, a: `Prices start from ${cityData.price}ILS. The final price depends on time of day (night tariff), number of passengers, and luggage. Use our calculator for an instant quote.` },
                                 { q: `How far in advance should I book?`, a: `We recommend booking at least 24 hours in advance, especially during holidays. However, we also accept last-minute bookings subject to availability.` },
+                                { q: `How can I pay for the ride?`, a: `We accept multiple payment methods for your convenience: Cash, and mobile payment apps like Bit and Paybox.` },
                                 { q: `Do your drivers speak English?`, a: `Yes, most of our drivers speak fluent English and are experienced in serving international travelers.` }
                             ].map((faq, idx) => (
                                 <details key={idx} className="group bg-surface border border-white/5 rounded-xl">
@@ -173,6 +216,25 @@ export default async function CityPageEn({ params }: Props) {
                                     </div>
                                 </details>
                             ))}
+                        </div>
+
+                        {/* Nearby Cities - Internal Linking */}
+                        <div className="mt-20 pt-12 border-t border-white/5">
+                            <h3 className="text-2xl font-bold mb-8 text-center text-gold">Other areas we serve nearby</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {Object.entries(CITIES)
+                                    .filter(([key, entry]) => entry.en.region === cityData.region && entry.en.name !== cityData.name)
+                                    .slice(0, 12)
+                                    .map(([key, entry]) => (
+                                        <Link
+                                            key={key}
+                                            href={`/en/taxi-${key}`}
+                                            className="bg-white/5 border border-white/10 p-4 rounded-xl text-center text-sm hover:border-gold/50 hover:bg-gold/5 transition-all text-gray-300 hover:text-gold"
+                                        >
+                                            Taxi from {entry.en.name}
+                                        </Link>
+                                    ))}
+                            </div>
                         </div>
 
                     </div>

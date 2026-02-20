@@ -24,7 +24,7 @@
 ## Phase 3: Trust & Content (SEO)
 - [x] **Dynamic City Pages** (`/taxi-[city]`, `/en/taxi-[city]`)
 - [ ] **Blog/Resources Section**
-- [ ] **Reviews Integration** (Google Business Profile)
+- [ ] **Reviews Integration** (Google Business Profile) - *Note: Need to find the correct canonical Place ID for the Service Area location.*
 - [ ] **Interactive Checklist** for travelers
 
 ## Phase 4: Polish & Launch

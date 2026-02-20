@@ -21,11 +21,13 @@ export const dictionary = {
             full_name: "שם מלא",
             phone: "מספר טלפון",
             route6: "סע דרך כביש 6 (הכי מהיר)",
+            baby_seat: "הזמן כסא תינוק (תוספת 40₪)",
             base_price: "תעריף בסיס + נסיעה",
             airport_fee: "אגרת ומסים נתב\"ג",
             luggage_fee: "תוספת מזוודות",
             night_tariff: "תעריף לילה/שבת כלול",
             route6_fee: "תוספת כביש 6",
+            baby_seat_fee: "תוספת כסא תינוק",
             total: "סה\"כ לתשלום (משוער)",
             vat_included: "כולל מע\"מ",
             submit_btn: "הזמן מונית בוואטסאפ",
@@ -39,6 +41,7 @@ export const dictionary = {
 מספר טיסה: {3}
 נוסעים: {4}
 מזוודות: {5}
+כסא תינוק: {7}
 מחיר באתר: {6}₪`
         },
         city_page: {
@@ -53,6 +56,42 @@ export const dictionary = {
             availability: "זמינות 24/7",
             large_taxis: "מוניות גדולות למשפחות",
             faq_title: "שאלות נפוצות",
+        },
+        faq: {
+            title: "שאלות ותשובות",
+            questions: [
+                {
+                    q: "כמה עולה מונית לנתב\"ג?",
+                    a: "המחיר משתנה בהתאם לעיר האיסוף, שעת הנסיעה (תעריף יום/לילה) ומספר הנוסעים. ניתן להשתמש במחשבון המחיר שלנו בראש העמוד לקבלת הערכה מדויקת."
+                },
+                {
+                    q: "האם אתם עובדים בשבת וחגים?",
+                    a: "כן, מוניות גולדה זמינות עבורכם 24 שעות ביממה, 7 ימים בשבוע, כולל שבתות, חגים ולילות."
+                },
+                {
+                    q: "יש לכם מוניות גדולות למשפחות?",
+                    a: "בהחלט. ברשותנו צי רכבים הכולל מוניות ספיישל רגילות וגם מוניות גדולות (Minivan) המאימות לעד 6-10 נוסעים עם הרבה מזוודות."
+                },
+                {
+                    q: "כמה זמן מראש כדאי להזמין?",
+                    a: "לנסיעות לנתב\"ג אנחנו ממליצים להזמין לפחות 12-24 שעות מראש כדי להבטיח נהג זמין, אך ניתן להזמין גם בהתראה קצרה."
+                }
+            ]
+        },
+        testimonials: {
+            title: "מה הלקוחות שלנו אומרים",
+            items: [
+                {
+                    name: "דניאל כהן",
+                    text: "שירות מצוין! הנהג הגיע 5 דקות לפני הזמן, הרכב היה נקי ומרווח. ממליץ בחום למי שמחפש שקט נפשי בדרך לשדה.",
+                    stars: 5
+                },
+                {
+                    name: "מיכל לוי",
+                    text: "הזמנתי מונית גדולה לכל המשפחה. הכל תקתק, המחשבון באתר דייק במחיר ולא היו הפתעות. בהחלט נזמין שוב.",
+                    stars: 5
+                }
+            ]
         },
         deliveries: {
             title: "משלוחי אקספרס במונית",
@@ -85,11 +124,13 @@ export const dictionary = {
             full_name: 'Full Name',
             phone: 'Phone Number',
             route6: 'Use Highway 6 (Fastest)',
+            baby_seat: 'Request Baby Seat (+40 ILS)',
             base_price: 'Base Fare + Distance',
             airport_fee: 'Airport Fees & Taxes',
             luggage_fee: 'Luggage Supplement',
             night_tariff: 'Night/Weekend Rate Included',
             route6_fee: 'Highway 6 Toll',
+            baby_seat_fee: 'Baby Seat Fee',
             total: 'Total Estimated Price',
             vat_included: 'VAT Included',
             submit_btn: 'Book Taxi Now',
@@ -103,6 +144,7 @@ Flight Time: {2}
 Flight No: {3}
 Passengers: {4}
 Luggage: {5}
+Baby Seat: {7}
 Website Price: {6}ILS`
         },
         city_page: {
@@ -117,6 +159,42 @@ Website Price: {6}ILS`
             availability: '24/7 Availability',
             large_taxis: 'Large Vans Available',
             faq_title: 'Frequently Asked Questions',
+        },
+        faq: {
+            title: "Common Questions",
+            questions: [
+                {
+                    q: "How much is a taxi to Ben Gurion?",
+                    a: "The price depends on your pickup city, time of day (day/night tariff), and number of passengers. Use our calculator at the top of the page for an accurate estimate."
+                },
+                {
+                    q: "Do you operate on weekends and holidays?",
+                    a: "Yes, Golda Cabs is available 24/7, including Saturdays, Jewish holidays, and night hours."
+                },
+                {
+                    q: "Do you have large taxis for families?",
+                    a: "Yes. Our fleet includes standard sedans as well as large minivans that can accommodate up to 610 passengers with multiple suitcases."
+                },
+                {
+                    q: "How far in advance should I book?",
+                    a: "For airport trips, we recommend booking at least 12-24 hours in advance, although same-day bookings are often possible."
+                }
+            ]
+        },
+        testimonials: {
+            title: "Customer Reviews",
+            items: [
+                {
+                    name: "Daniel C.",
+                    text: "Excellent service! The driver arrived 5 minutes early, and the car was clean and spacious. Highly recommended.",
+                    stars: 5
+                },
+                {
+                    name: "Michal L.",
+                    text: "Booked a large van for the whole family. Everything was perfect, and the price matched the website calculator exactly.",
+                    stars: 5
+                }
+            ]
         },
         deliveries: {
             title: "Express Taxi Deliveries",

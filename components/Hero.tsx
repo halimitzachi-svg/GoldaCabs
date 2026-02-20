@@ -2,9 +2,12 @@ import { ArrowLeft, ArrowRight, ShieldCheck, Star, Clock } from "lucide-react";
 import PriceCalculator from "./PriceCalculator";
 import { dictionary, Locale } from '@/lib/dictionary';
 
-export default function Hero({ lang = 'he' }: { lang?: Locale }) {
+export default function Hero({ lang = 'he', isSubPage = false, customTitle }: { lang?: Locale, isSubPage?: boolean, customTitle?: string }) {
     const t = dictionary[lang].hero;
     const isRTL = lang === 'he';
+
+    const TitleTag = isSubPage ? 'h2' : 'h1';
+    const displayTitle = customTitle || t.title;
 
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-20">
@@ -46,11 +49,11 @@ export default function Hero({ lang = 'he' }: { lang?: Locale }) {
                             <span className="text-sm font-medium text-gold">Premium Taxi Service</span>
                         </div>
 
-                        <h1 className="text-5xl md:text-7xl font-bold leading-tight text-white">
-                            {t.title.split(' ').map((word, i) => (
+                        <TitleTag className="text-5xl md:text-7xl font-bold leading-tight text-white">
+                            {displayTitle.split(' ').map((word, i) => (
                                 i === 1 ? <span key={i} className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-white to-gold block text-glow-gold">{word} </span> : word + ' '
                             ))}
-                        </h1>
+                        </TitleTag>
 
                         <p className="text-xl text-gray-400 max-w-lg leading-relaxed mx-auto">
                             {t.subtitle}
