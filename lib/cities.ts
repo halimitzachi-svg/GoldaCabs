@@ -19,9 +19,12 @@ const calculateDuration = (distanceKm: number, lang: 'he' | 'en') => {
     return lang === 'he' ? `${rounded} דק׳` : `${rounded} min`;
 };
 
-// Helper function to calculate price based on distance
-const calculatePrice = (distanceKm: number) => {
-    const base = PRICING_CONSTANTS.START_PRICE + (distanceKm * PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_1);
+// Helper function to calculate price based on distance and region
+const calculatePrice = (distanceKm: number, region: string = 'central') => {
+    const multipliers = PRICING_CONSTANTS.REGION_MULTIPLIERS as Record<string, number>;
+    const multiplier = multipliers[region] || 1.0;
+
+    const base = PRICING_CONSTANTS.START_PRICE + (distanceKm * PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_1 * multiplier);
     const rounded = Math.ceil(base / 10) * 10; // Round to nearest 10 for clean display
     return rounded.toString();
 };
@@ -30,13 +33,13 @@ const createCity = (heName: string, enName: string, distanceKm: number, region: 
     he: {
         name: heName,
         duration: calculateDuration(distanceKm, 'he'),
-        price: calculatePrice(distanceKm),
+        price: calculatePrice(distanceKm, region),
         region
     },
     en: {
         name: enName,
         duration: calculateDuration(distanceKm, 'en'),
-        price: calculatePrice(distanceKm),
+        price: calculatePrice(distanceKm, region),
         region
     }
 });

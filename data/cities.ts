@@ -79,4 +79,12 @@ export const PRICING_CONSTANTS = {
     PASSENGER_SURCHARGE_THRESHOLD: 4,
     PASSENGER_SURCHARGE_AMOUNT: 30.0, // For "Maxi Taxi" request
     BABY_SEAT_PRICE: 40.0,
+    // Regional Adjustments (Multipliers for KM rate)
+    REGION_MULTIPLIERS: {
+        'central': 1.0,    // Base rate
+        'sharon': 1.0,     // Base rate
+        'north': 1.1,      // 10% increase for northern remote areas
+        'south': 1.1,      // 10% increase for southern remote areas
+        'jerusalem': 1.05, // 5% increase for Jerusalem area (tolls/hills)
+    }
 };

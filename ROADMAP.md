@@ -1,34 +1,34 @@
 # GoldaCabs Roadmap
 
-## Phase 1: Foundation & Setup (Current Focus)
+## Phase 1: Foundation & Setup
 - [x] Project Initialization (Next.js 14+, Tailwind, TypeScript)
-- [x] Install Core Dependencies (Framer Motion, Lucide, Prisma)
-- [x] Setup Prisma & Environment Variables
-- [ ] UI Design System Setup (Colors, Fonts, Base Components)
-- [ ] Database Schema Design (Drivers, Rides, Leads)
+- [x] Install Core Dependencies (Framer Motion, Lucide)
+- [x] UI Design System Setup (Luxury Dark Theme, Gold Accents)
+- [x] Pricing Engine Configuration
+  - [x] **Core Location:** `data/cities.ts` (Manage km rates, base fees, and regional multipliers here)
+  - [x] **Regional Multipliers:** North/South (1.1x), Jerusalem (1.05x)
 
 ## Phase 2: Core Features
 - [x] **Home Page (Hero Section)**
   - [x] High-impact personal branding (Video Background)
-  - [x] "Call to Action" buttons
+  - [x] "Call to Action" buttons (WhatsApp Integration)
 - [x] **Smart Price Calculator**
   - [x] Google Maps Places Autocomplete integration
-  - [x] Dynamic pricing logic (Distance, Time, Passengers)
+  - [x] Dynamic pricing logic (Distance, Time, Passengers, Region)
   - [x] Multilingual Support (HE/EN)
-  - [ ] **Smart Flight Input:** Detect airline code (LY, BA) -> Show Logo
-- [ ] **Lead Management System (Admin)**
-  - [ ] Dashboard for viewing incoming leads
-  - [ ] "Dispatch to Driver" feature
-  - [ ] Commission tracking (Basic)
+- [ ] **Smart Flight Input** (Future enhancement)
 
-## Phase 3: Trust & Content (SEO)
+## Phase 3: Trust & Content (SEO Strategy)
 - [x] **Dynamic City Pages** (`/taxi-[city]`, `/en/taxi-[city]`)
-- [ ] **Blog/Resources Section**
-- [ ] **Reviews Integration** (Google Business Profile) - *Note: Need to find the correct canonical Place ID for the Service Area location.*
-- [ ] **Interactive Checklist** for travelers
+  - [x] 60+ locations coverage
+  - [x] Internal linking mesh (Nearby cities component)
+  - [x] Categorized Service Areas in Footer
+- [ ] **Reviews Integration** (Google Business Profile) - *Note: On hold due to Place ID verification for Service Area businesses.*
 
 ## Phase 4: Polish & Launch
 - [x] Performance Optimization (Video WebM + WebP Poster)
-- [ ] Mobile Responsiveness Audit
 - [x] SEO Meta Tags & Structured Data (JSON-LD)
-- [ ] Final Deployment (Vercel/Netlify)
+- [ ] **Post-Launch SEO Strategy**
+  - [ ] Implement 301 Redirects from `taxi-michael.co.il` to `goldacabs.co.il`
+  - [ ] Monitor Search Console for indexing success
+- [ ] Final Deployment & Production Check
