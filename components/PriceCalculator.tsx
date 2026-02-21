@@ -31,6 +31,9 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
     const [useRoute6, setUseRoute6] = useState(false);
     const [babySeat, setBabySeat] = useState(false);
     const [breakdown, setBreakdown] = useState<any>(null);
+    const [recommendedPickupTime, setRecommendedPickupTime] = useState('');
+    const [tripDuration, setTripDuration] = useState(0);
+    const [activeRegion, setActiveRegion] = useState('north'); // Default to north as it's the "base"
     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
     // User Details
@@ -64,7 +67,54 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
         if (autocompleteRef.current) {
             const place = autocompleteRef.current.getPlace();
             if (place.geometry && place.geometry.location) {
-                setOriginName(place.name || place.formatted_address || '');
+                const name = place.name || place.formatted_address || '';
+                setOriginName(name);
+
+                // Detect Region
+                const addressComponents = place.address_components || [];
+                const fullName = place.name || '';
+                const fullAddress = place.formatted_address || '';
+
+                let detectedRegion = 'north'; // Default
+
+                // Combine all searchable strings
+                const searchNames = [
+                    ...addressComponents.map(c => c.long_name),
+                    ...addressComponents.map(c => c.short_name),
+                    fullName,
+                    fullAddress
+                ];
+
+                const isCentral = searchNames.some(name =>
+                    /Tel Aviv|Central|מרכז|תל אביב|גוש דן|Ramat Gan|Givatayim|Bnei Brak|Holon|Bat Yam|ראשון לציון|Rishon|רמת גן|גבעתיים|בני ברק|חולון|בת ים|פתח תקווה|אלעד|ראש העין/i.test(name)
+                );
+                const isSharon = searchNames.some(name =>
+                    /Sharon|Netanya|Herzliya|Raanana|נתניה|הרצליה|רעננה|שרון|Hod HaSharon|Kfar Saba|כפר סבא|הוד השרון/i.test(name)
+                );
+                const isSouth = searchNames.some(name =>
+                    /South|Ashdod|Beersheba|Darom|אשדוד|באר שבע|דרום|Ashkelon|Rehovot|אשקלון|רחובות|נס ציונה|Ness Ziona|יבנה|Yavne/i.test(name)
+                );
+                const isJerusalem = searchNames.some(name =>
+                    /Jerusalem|ירושלים|Bet Shemesh|בית שמש/i.test(name)
+                );
+                const isNorthBase = searchNames.some(name =>
+                    /Haifa|חיפה|Krayot|קריות|Akko|עכו|Nahariya|נהריה|Tzafon|צפון/i.test(name)
+                );
+
+                if (isJerusalem) detectedRegion = 'jerusalem';
+                else if (isSouth) detectedRegion = 'south';
+                else if (isSharon) detectedRegion = 'sharon';
+                else if (isCentral) detectedRegion = 'central';
+                else if (isNorthBase) detectedRegion = 'north';
+                else detectedRegion = 'north';
+
+                console.log('--- Region Detection Debug ---');
+                console.log('Full Name:', fullName);
+                console.log('Full Address:', fullAddress);
+                console.log('All Searchable Parts:', searchNames);
+                console.log('Assigned Region:', detectedRegion);
+
+                setActiveRegion(detectedRegion);
                 calculateDistance(place.geometry.location);
             }
         }
@@ -88,39 +138,91 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
 
     // Pricing Engine
     useEffect(() => {
-        let tariffType = 'A'; // A = Day, B = Night/Shabbat
+        let kmRate = PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_1;
+        let activeTariff = 'A';
 
         if (flightTime) {
-            // Logic: Pickup time is ~4 hours before flight
             const flightDate = new Date(flightTime);
-            const pickupDate = new Date(flightDate.getTime() - (4 * 60 * 60 * 1000));
 
-            const hour = pickupDate.getHours();
-            const day = pickupDate.getDay(); // 0-6
+            // 1. Calculate trip duration (Refined based on real-world averages)
+            // Without Route 6: ~0.9 min/km (avg 67km/h) + 15m buffer
+            // With Route 6: ~0.75 min/km (avg 80km/h) + 10m buffer
+            const minPerKm = useRoute6 ? 0.75 : 0.9;
+            const buffer = useRoute6 ? 10 : 15;
+            const tripDurationMin = (distanceKm * minPerKm) + buffer;
+            setTripDuration(Math.round(tripDurationMin));
 
-            const isNight = hour >= 21 || hour < 6;
-            const isWeekend = (day === 5 && hour >= 16) || day === 6 || (day === 0 && hour < 6);
+            // 2. Pickup = Flight Time - 3 hours (180 min) - trip duration
+            const pickupDate = new Date(flightDate.getTime() - (180 * 60 * 1000) - (tripDurationMin * 60 * 1000));
 
-            if (isNight || isWeekend) tariffType = 'B';
+            // Format for display and WA
+            const formattedPickup = pickupDate.toLocaleString('he-IL', {
+                day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+            });
+            setRecommendedPickupTime(formattedPickup);
+
+            const tripArrivalDate = new Date(pickupDate.getTime() + (tripDurationMin * 60 * 1000));
+
+            const getTariffAtTime = (date: Date) => {
+                const hour = date.getHours();
+                const day = date.getDay();
+                const isNight = hour >= 21 || hour < 6;
+                const isWeekendEarly = (day === 5 && hour >= 16) || (day === 6 && hour >= 6 && hour < 21);
+                const isShabbatPeak = (day === 5 && hour >= 21) || (day === 6 && hour < 6) || (day === 6 && hour >= 21) || (day === 0 && hour < 6);
+
+                if (isShabbatPeak) return { rate: PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_3, label: 'C' };
+                if (isNight || isWeekendEarly) return { rate: PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_2, label: 'B' };
+                return { rate: PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_1, label: 'A' };
+            };
+
+            const startTariff = getTariffAtTime(pickupDate);
+            const endTariff = getTariffAtTime(tripArrivalDate);
+
+            if (startTariff.label === endTariff.label) {
+                kmRate = startTariff.rate;
+                activeTariff = startTariff.label;
+            } else {
+                kmRate = (startTariff.rate + endTariff.rate) / 2;
+                activeTariff = `${startTariff.label}→${endTariff.label}`;
+            }
         }
 
-        const kmRate = tariffType === 'A' ? PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_1 : PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_2;
+        // Find Vehicle Config based on both passengers and luggage
+        const vehicleConfig = PRICING_CONSTANTS.VEHICLE_TYPES.find(v =>
+            passengers <= v.maxPassengers && luggage <= v.maxLuggage
+        ) || PRICING_CONSTANTS.VEHICLE_TYPES[PRICING_CONSTANTS.VEHICLE_TYPES.length - 1];
+
+        const vehicleMultiplier = vehicleConfig.multiplier;
+
+        // Apply Regional Multiplier
+        const regionMultiplier = (PRICING_CONSTANTS.REGION_MULTIPLIERS as any)[activeRegion] || 1.0;
 
         // Base Calculations
-        const pureDistancePrice = Math.max(0, distanceKm - 10) * kmRate;
-        // Logic: First 10km might be base, or just full distance. Let's do full distance * rate + base for simplicity as requested
-        const distancePrice = distanceKm * kmRate;
+        const distancePrice = distanceKm * kmRate * vehicleMultiplier * regionMultiplier;
 
-        const startPrice = PRICING_CONSTANTS.START_PRICE;
+        const startPrice = PRICING_CONSTANTS.START_PRICE * vehicleMultiplier * regionMultiplier;
         const airportFee = PRICING_CONSTANTS.AIRPORT_FEE;
 
         // Extras
-        const luggageFee = Math.max(0, luggage - 1) * PRICING_CONSTANTS.SUITCASE_PRICE;
-        const vehicleSurcharge = passengers > 4 ? PRICING_CONSTANTS.PASSENGER_SURCHARGE_AMOUNT : 0;
-        const route6Fee = useRoute6 ? PRICING_CONSTANTS.ROUTE_6_PRICE : 0;
+
+        // Dynamic Route 6 Pricing based on distance
+        let route6Price = 0;
+        if (useRoute6) {
+            if (distanceKm < 35) route6Price = 20;
+            else if (distanceKm < 80) route6Price = 40;
+            else route6Price = 50; // Haifa case refined
+        }
+
+        const route6Fee = route6Price;
         const babySeatFee = babySeat ? PRICING_CONSTANTS.BABY_SEAT_PRICE : 0;
 
-        let total = startPrice + distancePrice + airportFee + luggageFee + vehicleSurcharge + route6Fee + babySeatFee;
+        let total = startPrice + distancePrice + airportFee + route6Fee + babySeatFee;
+
+        console.log('--- Price Calculation Debug ---');
+        console.log('Region Multiplier:', regionMultiplier, `(Area: ${activeRegion})`);
+        console.log('KM Rate:', kmRate);
+        console.log('Distance Price:', distancePrice);
+        console.log('Total Before Rounding:', total);
 
         // Round up to nearest 10
         total = Math.ceil(total / 10) * 10;
@@ -130,14 +232,14 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
             start: startPrice,
             distance: distancePrice,
             airport: airportFee,
-            luggage: luggageFee,
-            vehicle: vehicleSurcharge,
+            vehicleName: lang === 'he' ? vehicleConfig.nameHe : vehicleConfig.nameEn,
+            vehicleMultiplier: vehicleMultiplier,
             route6: route6Fee,
             babySeat: babySeatFee,
-            tariff: tariffType
+            tariff: activeTariff
         });
 
-    }, [distanceKm, passengers, luggage, flightTime, useRoute6, babySeat]);
+    }, [distanceKm, passengers, luggage, flightTime, useRoute6, babySeat, lang, activeRegion]);
 
     const handleBooking = () => {
         const newErrors: { origin?: string; name?: string; phone?: string } = {};
@@ -170,10 +272,12 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
             .replace('{1}', originName)
             .replace('{2}', flightTime.replace('T', ' '))
             .replace('{3}', flightNumber || '-')
-            .replace('{4}', passengers.toString())
+            .replace('{4}', `${passengers} (${breakdown?.vehicleName})`)
             .replace('{5}', luggage.toString())
             .replace('{6}', price.toString())
-            .replace('{7}', babySeat ? (lang === 'he' ? 'כן' : 'Yes') : (lang === 'he' ? 'לא' : 'No'));
+            .replace('{7}', babySeat ? (lang === 'he' ? 'כן' : 'Yes') : (lang === 'he' ? 'לא' : 'No'))
+            .replace('{8}', useRoute6 ? (lang === 'he' ? 'כן' : 'Yes') : (lang === 'he' ? 'לא' : 'No'))
+            .replace('{9}', recommendedPickupTime);
 
         const encodedMessage = encodeURIComponent(message);
         window.open(`https://wa.me/972547438110?text=${encodedMessage}`, '_blank');
@@ -256,17 +360,40 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                     </div>
                 </div>
 
+                {/* Recommended Pickup Time Alert */}
+                <AnimatePresence>
+                    {distanceKm > 0 && recommendedPickupTime && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4 group/pickup"
+                        >
+                            <div className="bg-gold/10 p-3 rounded-xl text-gold group-hover/pickup:rotate-12 transition-transform">
+                                <Clock className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="text-xs text-gray-500">{lang === 'he' ? 'זמן איסוף מומלץ מהבית' : 'Recommended Pickup Time'}</div>
+                                <div className="text-md font-bold text-white">{recommendedPickupTime}</div>
+                                <div className="text-[10px] text-gold/60 mt-0.5">
+                                    {lang === 'he'
+                                        ? `* מחושב לפי 3 שעות לפני המראה + זמן נסיעה משוער (${tripDuration} דק')`
+                                        : `* Based on 3h before takeoff + travel time (${tripDuration} min)`}
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 {/* Counter Inputs Row */}
                 <div className="grid grid-cols-2 gap-4">
                     {/* Passengers */}
                     <div className="space-y-2">
-                        <label className="text-sm text-gray-400 flex justify-between items-center h-6">
+                        <label className="text-sm text-gray-400 flex items-center h-6">
                             <span>{t.passengers}</span>
-                            {passengers > 4 && <span className="text-gold text-xs bg-gold/10 px-1.5 py-0.5 rounded">{t.large_vehicle}</span>}
                         </label>
                         <div className="flex items-center bg-dark-bg/50 border border-white/10 rounded-xl p-1 relative h-[52px]">
                             <button
-                                onClick={() => setPassengers(Math.min(10, passengers + 1))}
+                                onClick={() => setPassengers(Math.min(PRICING_CONSTANTS.MAX_PASSENGERS, passengers + 1))}
                                 className="w-10 h-full flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-lg text-white transition-colors"
                             >
                                 <Plus className="w-4 h-4" />
@@ -285,10 +412,12 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
 
                     {/* Luggage */}
                     <div className="space-y-2">
-                        <label className="text-sm text-gray-400 flex items-center h-6">{t.luggage}</label>
+                        <label className="text-sm text-gray-400 flex items-center h-6">
+                            <span>{t.luggage}</span>
+                        </label>
                         <div className="flex items-center bg-dark-bg/50 border border-white/10 rounded-xl p-1 relative h-[52px]">
                             <button
-                                onClick={() => setLuggage(Math.min(10, luggage + 1))}
+                                onClick={() => setLuggage(Math.min(PRICING_CONSTANTS.MAX_LUGGAGE, luggage + 1))}
                                 className="w-10 h-full flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-lg text-white transition-colors"
                             >
                                 <Plus className="w-4 h-4" />
@@ -305,6 +434,31 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                         </div>
                     </div>
                 </div>
+
+                {/* Vehicle Type Info Badge - Elegant & Dynamic */}
+                <AnimatePresence>
+                    {(passengers > 4 || luggage > 3) && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0, y: -10 }}
+                            animate={{ opacity: 1, height: 'auto', y: 0 }}
+                            exit={{ opacity: 0, height: 0, y: -10 }}
+                            className="bg-gold/5 border border-gold/20 rounded-2xl p-3 flex items-center justify-between group/vehicle"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="bg-gold/10 p-2 rounded-xl text-gold group-hover/vehicle:scale-110 transition-transform">
+                                    <Car className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <div className="text-xs text-gold/60 leading-none mb-1">{isRTL ? 'סוג רכב נדרש' : 'Required Vehicle'}</div>
+                                    <div className="text-sm font-bold text-white leading-none">{breakdown?.vehicleName}</div>
+                                </div>
+                            </div>
+                            <div className="text-[10px] bg-gold/10 text-gold px-2 py-1 rounded-full border border-gold/20 font-bold">
+                                Factor x{breakdown?.vehicleMultiplier}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* Personal Info Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -377,30 +531,45 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
 
                 {/* Pricing Logic Breakdown */}
                 <div className="space-y-1">
-                    <div className="flex justify-between text-xs text-gray-500">
+                    <div className="flex justify-between text-xs text-gray-400 font-medium">
                         <span>{t.base_price}</span>
                         <span>₪{Math.round(breakdown?.distance + breakdown?.start)}</span>
                     </div>
                     <div className="flex justify-between text-xs text-gray-500">
-                        <span>{t.airport_fee}</span>
+                        <span className="flex items-center gap-1">
+                            {t.airport_fee}
+                            <Info className="w-2.5 h-2.5 opacity-50" />
+                        </span>
                         <span>₪{PRICING_CONSTANTS.AIRPORT_FEE}</span>
                     </div>
-                    {breakdown?.luggage > 0 && (
-                        <div className="flex justify-between text-xs text-gray-500">
-                            <span>{t.luggage_fee}</span>
-                            <span>₪{breakdown?.luggage}</span>
+                    {breakdown?.vehicleMultiplier > 1 && (
+                        <div className="flex justify-between text-xs text-gold/80">
+                            <span>{breakdown?.vehicleName} (Factor x{breakdown?.vehicleMultiplier})</span>
+                            <span className="flex items-center gap-1"><Info className="w-3 h-3" /></span>
                         </div>
                     )}
-                    {breakdown?.tariff === 'B' && (
+                    {breakdown?.tariff?.includes('→') && (
+                        <div className="flex justify-between text-xs text-gold/80 italic">
+                            <span>{lang === 'he' ? 'חילוף תעריפים במהלך נסיעה' : 'Tariff change during trip'}</span>
+                            <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" /></span>
+                        </div>
+                    )}
+                    {(breakdown?.tariff === 'B' || breakdown?.tariff?.startsWith('B→') || breakdown?.tariff?.endsWith('→B')) && (
                         <div className="flex justify-between text-xs text-gold/80">
                             <span>{t.night_tariff}</span>
+                            <span className="flex items-center gap-1"><Info className="w-3 h-3" /></span>
+                        </div>
+                    )}
+                    {(breakdown?.tariff === 'C' || breakdown?.tariff?.startsWith('C→') || breakdown?.tariff?.endsWith('→C')) && (
+                        <div className="flex justify-between text-xs text-gold/80">
+                            <span>{t.shabbat_tariff}</span>
                             <span className="flex items-center gap-1"><Info className="w-3 h-3" /></span>
                         </div>
                     )}
                     {useRoute6 && (
                         <div className="flex justify-between text-xs text-gold/80">
                             <span>{t.route6_fee}</span>
-                            <span>₪{PRICING_CONSTANTS.ROUTE_6_PRICE}</span>
+                            <span>₪{breakdown?.route6}</span>
                         </div>
                     )}
                     {babySeat && (
@@ -433,6 +602,11 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                         </AnimatePresence>
                     </div>
                 </div>
+
+                {/* Disclaimer */}
+                <p className="text-[10px] text-gray-500 italic px-2">
+                    {t.disclaimer}
+                </p>
 
                 {/* CTA */}
                 <button

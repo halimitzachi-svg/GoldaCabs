@@ -25,7 +25,8 @@ export const dictionary = {
             base_price: "תעריף בסיס + נסיעה",
             airport_fee: "אגרת ומסים נתב\"ג",
             luggage_fee: "תוספת מזוודות",
-            night_tariff: "תעריף לילה/שבת כלול",
+            night_tariff: "תעריף לילה/סופ\"ש כלול (ב')",
+            shabbat_tariff: "תעריף שבת/חג שיא כלול (ג')",
             route6_fee: "תוספת כביש 6",
             baby_seat_fee: "תוספת כסא תינוק",
             total: "סה\"כ לתשלום (משוער)",
@@ -34,15 +35,17 @@ export const dictionary = {
             submitting: "מכין להזמנה...",
             loading_map: "טוען מפות...",
             error_details: "נא למלא שם וטלפון תקינים",
+            disclaimer: "* המחיר המוצג הינו הערכה משוערת בלבד המבוססת על נתוני הנסיעה, ואינו מהווה מחיר סופי מחייב.",
             whatsapp_msg: `היי מוניות גולדה, אשמח להזמין מונית.
 שם: {0}
 מאיפה: {1}
-זמן טיסה: {2}
+מועד: {2}
 מספר טיסה: {3}
 נוסעים: {4}
 מזוודות: {5}
 כסא תינוק: {7}
-מחיר באתר: {6}₪`
+כביש 6: {8}
+מחיר משוער באתר: {6}₪`
         },
         city_page: {
             title: "מונית מ{city} לנתב\"ג",
@@ -128,7 +131,8 @@ export const dictionary = {
             base_price: 'Base Fare + Distance',
             airport_fee: 'Airport Fees & Taxes',
             luggage_fee: 'Luggage Supplement',
-            night_tariff: 'Night/Weekend Rate Included',
+            night_tariff: 'Night/Weekend Rate Included (B)',
+            shabbat_tariff: 'Shabbat Peak Rate Included (C)',
             route6_fee: 'Highway 6 Toll',
             baby_seat_fee: 'Baby Seat Fee',
             total: 'Total Estimated Price',
@@ -137,15 +141,17 @@ export const dictionary = {
             submitting: 'Booking...',
             loading_map: 'Loading Maps...',
             error_details: 'Please fill name and phone to book',
+            disclaimer: "* The price shown is an estimate based on your trip data and is not a final binding price.",
             whatsapp_msg: `Hi GoldaCabs, I'd like to book a taxi.
 Name: {0}
 From: {1}
-Flight Time: {2}
+Time: {2}
 Flight No: {3}
 Passengers: {4}
 Luggage: {5}
 Baby Seat: {7}
-Website Price: {6}ILS`
+Highway 6: {8}
+Estimated Website Price: {6}ILS`
         },
         city_page: {
             title_prefix: 'Taxi from',
