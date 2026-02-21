@@ -32,7 +32,7 @@ export default function Testimonials({ lang = 'he' }: { lang?: Locale }) {
                     setStats({ rating: data.rating, total: data.totalRatings });
                 }
             } catch (error) {
-                console.error('Failed to load reviews');
+                // Ignore silent fail
             } finally {
                 setIsLoading(false);
             }
