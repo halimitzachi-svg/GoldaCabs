@@ -32,3 +32,7 @@
   - [ ] Implement 301 Redirects from `taxi-michael.co.il` to `goldacabs.co.il`
   - [ ] Monitor Search Console for indexing success
 - [ ] Final Deployment & Production Check
+
+
+Place ID for google testimonials:
+ChIJPX-v0hAtHRURK8j0N6_v2K4
