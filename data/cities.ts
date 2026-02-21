@@ -91,10 +91,10 @@ export const PRICING_CONSTANTS = {
 
     // Regional Adjustments (Multipliers for KM rate)
     REGION_MULTIPLIERS: {
-        'central': 2,    // Gush Dan
+        'central': 1.6,    // Gush Dan
         'sharon': 1.5,     // Sharon Area
-        'north': 1.0,      // Base (Haifa & North) - per your request
+        'north': 1.05,      // Base (Haifa & North) - per your request
         'south': 2,      // Southern District
-        'jerusalem': 1.6,  // Jerusalem
+        'jerusalem': 1.52,  // Jerusalem
     }
 };
