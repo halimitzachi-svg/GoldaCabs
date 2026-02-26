@@ -9,8 +9,30 @@ export default function Hero({ lang = 'he', isSubPage = false, customTitle }: { 
     const TitleTag = isSubPage ? 'h2' : 'h1';
     const displayTitle = customTitle || t.title;
 
+    const videoSchema = {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": displayTitle,
+        "description": t.subtitle,
+        "thumbnailUrl": "https://www.goldacabs.co.il/hero-poster.webp",
+        "uploadDate": "2024-02-01T08:00:00+02:00",
+        "contentUrl": "https://www.goldacabs.co.il/hero-video.webm",
+        "embedUrl": "https://www.goldacabs.co.il/",
+        "duration": "PT0M10S",
+        "interactionStatistic": {
+            "@type": "InteractionCounter",
+            "interactionType": { "@type": "WriteAction" },
+            "userInteractionCount": 1000
+        }
+    };
+
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-20">
+            {/* Video SEO Schema */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(videoSchema) }}
+            />
 
             {/* Video Background with Enhanced Fade */}
             <div className="absolute inset-x-0 top-0 h-[85vh] overflow-hidden pointer-events-none">
@@ -31,6 +53,7 @@ export default function Hero({ lang = 'he', isSubPage = false, customTitle }: { 
                         playsInline
                         className="w-full h-full object-cover"
                         poster="/hero-poster.webp"
+                        title="GoldaCabs Premium Service Promo"
                     >
                         <source src="/hero-video.webm" type="video/webm" />
                     </video>
