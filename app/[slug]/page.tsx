@@ -37,7 +37,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             locale: 'he_IL',
             type: 'website',
         },
-        keywords: [`מונית מ${cityData.name} לנתב"ג`, `מוניות ${cityData.name}`, 'הסעה לנתב"ג', 'מונית גדולה לשדה התעופה', cityData.name]
+        keywords: [`מונית מ${cityData.name} לנתב"ג`, `מוניות ${cityData.name}`, 'הסעה לנתב"ג', 'מונית גדולה לשדה התעופה', cityData.name],
+        alternates: {
+            canonical: `https://www.goldacabs.co.il/${slug}`,
+            languages: {
+                'he-IL': `https://www.goldacabs.co.il/${slug}`,
+                'en-IL': `https://www.goldacabs.co.il/en/${slug}`,
+            },
+        }
     };
 }
 

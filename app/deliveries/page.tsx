@@ -11,6 +11,9 @@ export const metadata = {
         title: 'משלוחי אקספרס במונית - מוניות גולדה',
         description: 'הדרך המהירה והבטוחה ביותר למשלוח מהיום להיום.',
         type: 'website',
+    },
+    alternates: {
+        canonical: 'https://www.goldacabs.co.il/deliveries',
     }
 };
 

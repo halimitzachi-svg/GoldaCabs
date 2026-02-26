@@ -39,10 +39,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         },
         keywords: [`taxi from ${cityData.name} to tlv`, `taxi ${cityData.name}`, 'airport transfer israel', 'golda cabs'],
         alternates: {
-            canonical: `https://goldacabs.com/en/${slug}`,
+            canonical: `https://www.goldacabs.co.il/en/${slug}`,
             languages: {
-                'he-IL': `https://goldacabs.com/${slug}`,
-                'en-IL': `https://goldacabs.com/en/${slug}`,
+                'he-IL': `https://www.goldacabs.co.il/${slug}`,
+                'en-IL': `https://www.goldacabs.co.il/en/${slug}`,
             },
         }
     };

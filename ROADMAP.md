@@ -23,7 +23,10 @@
   - [x] 60+ locations coverage
   - [x] Internal linking mesh (Nearby cities component)
   - [x] Categorized Service Areas in Footer
-- [ ] **Reviews Integration** (Google Business Profile) - *Note: On hold due to Place ID verification for Service Area businesses.*
+- [ ] **Reviews Integration** (Google Business Profile)
+  - [ ] Update website link in Google Business Profile to `goldacabs.co.il`
+  - [ ] Locate canonical Place ID once GBP update is propagated
+  - [ ] Connect `app/api/reviews/route.ts` to display real customer feedback
 
 ## Phase 4: Polish & Launch
 - [x] Performance Optimization (Video WebM + WebP Poster)

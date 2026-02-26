@@ -9,7 +9,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
         '',
         '/en',
         '/deliveries',
-        '/legal',
     ].map((route) => ({
         url: `${baseUrl}${route}`,
         lastModified: new Date(),
