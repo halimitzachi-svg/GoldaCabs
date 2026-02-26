@@ -71,20 +71,30 @@ export const CITIES_DATA: CityData[] = [
 
 export const PRICING_CONSTANTS = {
     KILOMETER_RATE_TARIFF_1: 3.5, // Day
-    KILOMETER_RATE_TARIFF_2: 4.2, // Night/Shabbat
+    KILOMETER_RATE_TARIFF_2: 4.2, // Night/Weekend
+    KILOMETER_RATE_TARIFF_3: 4.8, // Shabbat Peak (Fri 21:00 - Sun 06:00)
     START_PRICE: 11.0,
     AIRPORT_FEE: 5.0,
-    SUITCASE_PRICE: 10.0,
+    SUITCASE_PRICE: 0, // No extra charge per suitcase
     ROUTE_6_PRICE: 35.0, // Avg toll
-    PASSENGER_SURCHARGE_THRESHOLD: 4,
-    PASSENGER_SURCHARGE_AMOUNT: 30.0, // For "Maxi Taxi" request
     BABY_SEAT_PRICE: 40.0,
+
+    // Passenger & Vehicle Logic
+    MAX_PASSENGERS: 20,
+    MAX_LUGGAGE: 20,
+    VEHICLE_TYPES: [
+        { maxPassengers: 4, maxLuggage: 3, nameHe: 'מונית רגילה', nameEn: 'Standard Taxi', multiplier: 1.0 },
+        { maxPassengers: 7, maxLuggage: 8, nameHe: 'מונית גדולה (Van)', nameEn: 'Large Taxi (Van)', multiplier: 1.4 },
+        { maxPassengers: 11, maxLuggage: 12, nameHe: 'מיניבוס (11)', nameEn: 'Minibus (11)', multiplier: 1.9 },
+        { maxPassengers: 20, maxLuggage: 20, nameHe: 'מיניבוס VIP (20)', nameEn: 'VIP Minibus (20)', multiplier: 2.6 },
+    ],
+
     // Regional Adjustments (Multipliers for KM rate)
     REGION_MULTIPLIERS: {
-        'central': 1.0,    // Base rate
-        'sharon': 1.0,     // Base rate
-        'north': 1.1,      // 10% increase for northern remote areas
-        'south': 1.1,      // 10% increase for southern remote areas
-        'jerusalem': 1.05, // 5% increase for Jerusalem area (tolls/hills)
+        'central': 1.6,    // Gush Dan
+        'sharon': 1.5,     // Sharon Area
+        'north': 1.05,      // Base (Haifa & North) - per your request
+        'south': 2,      // Southern District
+        'jerusalem': 1.52,  // Jerusalem
     }
 };

@@ -24,8 +24,10 @@ const calculatePrice = (distanceKm: number, region: string = 'central') => {
     const multipliers = PRICING_CONSTANTS.REGION_MULTIPLIERS as Record<string, number>;
     const multiplier = multipliers[region] || 1.0;
 
-    const base = PRICING_CONSTANTS.START_PRICE + (distanceKm * PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_1 * multiplier);
-    const rounded = Math.ceil(base / 10) * 10; // Round to nearest 10 for clean display
+    const baseFare = PRICING_CONSTANTS.START_PRICE + (distanceKm * PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_1);
+    const totalWithMultiplier = baseFare * multiplier;
+
+    const rounded = Math.ceil(totalWithMultiplier / 10) * 10; // Round to nearest 10 for clean display
     return rounded.toString();
 };
 
