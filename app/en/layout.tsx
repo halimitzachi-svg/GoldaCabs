@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import Footer from "@/components/Footer";
 import AccessibilityWidget from "@/components/AccessibilityWidget";
 import PhoneWidget from "@/components/PhoneWidget";
@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "מוניות גולדה | מוניות לנתב\"ג VIP",
-  description: "שירות הסעות יוקרתי לנתב\"ג. נהג אישי, מחיר קבוע ואמינות ללא פשרות.",
+  title: "Golda Cabs | 24/7 Airport Taxi | VIP Service",
+  description: "Premium airport taxi service in Israel. Professional drivers, fixed prices, and 24/7 availability. Book your VIP ride online.",
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
@@ -25,13 +25,13 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({
+export default function EnRootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl">
+    <html lang="en" dir="ltr">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

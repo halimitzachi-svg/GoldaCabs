@@ -114,8 +114,8 @@ export default async function CityPage({ params }: Props) {
                                 <div className="bg-gold/20 p-4 rounded-full mb-4 text-gold">
                                     <MapPin className="w-8 h-8" />
                                 </div>
-                                <h3 className="font-bold text-xl mb-2">איסוף מדויק</h3>
-                                <p className="text-gray-400">מכל כתובת ב{cityData.name} ישירות לטרמינל 3</p>
+                                <h3 className="font-bold text-xl mb-2">מרחק מנתב"ג</h3>
+                                <p className="text-gray-400">כ-{cityData.distance} ק"מ מ{cityData.name}</p>
                             </div>
                             <div className="bg-white/5 border border-white/10 p-6 rounded-2xl flex flex-col items-center text-center">
                                 <div className="bg-gold/20 p-4 rounded-full mb-4 text-gold">

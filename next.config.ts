@@ -1,7 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async redirects() {
+    return [
+      {
+        source: '/taxi-aesarea',
+        destination: '/taxi-caesarea',
+        permanent: true,
+      },
+      {
+        source: '/en/taxi-aesarea',
+        destination: '/en/taxi-caesarea',
+        permanent: true,
+      },
+    ]
+  },
 };
 
 export default nextConfig;

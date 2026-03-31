@@ -4,6 +4,7 @@ export type CityData = {
     name: string;
     duration: string;
     price: string;
+    distance: number;
     region?: string;
 };
 
@@ -36,12 +37,14 @@ const createCity = (heName: string, enName: string, distanceKm: number, region: 
         name: heName,
         duration: calculateDuration(distanceKm, 'he'),
         price: calculatePrice(distanceKm, region),
+        distance: distanceKm,
         region
     },
     en: {
         name: enName,
         duration: calculateDuration(distanceKm, 'en'),
         price: calculatePrice(distanceKm, region),
+        distance: distanceKm,
         region
     }
 });
@@ -98,7 +101,7 @@ export const CITIES: Record<string, CityEntry> = {
     'nahariya': createCity('נהריה', 'Nahariya', 140, 'north'),
     'karmiel': createCity('כרמיאל', 'Karmiel', 135, 'north'),
     'tiberias': createCity('טבריה', 'Tiberias', 145, 'north'),
-    'n Nazareth': createCity('נצרת', 'Nazareth', 110, 'north'),
+    'nazareth': createCity('נצרת', 'Nazareth', 110, 'north'),
     'afula': createCity('עפולה', 'Afula', 100, 'north'),
     'migdal-haemek': createCity('מגדל העמק', 'Migdal HaEmek', 105, 'north'),
     'yokneam': createCity('יקנעם', 'Yokneam', 95, 'north'),

@@ -116,8 +116,8 @@ export default async function CityPageEn({ params }: Props) {
                                 <div className="bg-gold/20 p-4 rounded-full mb-4 text-gold">
                                     <MapPin className="w-8 h-8" />
                                 </div>
-                                <h3 className="font-bold text-xl mb-2">{t.pickup}</h3>
-                                <p className="text-gray-400">{t.pickup_desc}</p>
+                                <h3 className="font-bold text-xl mb-2">Distance to TLV</h3>
+                                <p className="text-gray-400">Approx. {cityData.distance} km from {cityData.name}</p>
                             </div>
                             <div className="bg-white/5 border border-white/10 p-6 rounded-2xl flex flex-col items-center text-center">
                                 <div className="bg-gold/20 p-4 rounded-full mb-4 text-gold">
