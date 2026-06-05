@@ -4,6 +4,7 @@ import "./globals.css";
 import Footer from "@/components/Footer";
 import AccessibilityWidget from "@/components/AccessibilityWidget";
 import PhoneWidget from "@/components/PhoneWidget";
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,6 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.goldacabs.co.il'),
   title: "מוניות גולדה | מוניות לנתב\"ג VIP",
   description: "שירות הסעות יוקרתי לנתב\"ג. נהג אישי, מחיר קבוע ואמינות ללא פשרות.",
   icons: {
@@ -39,6 +41,7 @@ export default function RootLayout({
         <Footer />
         <AccessibilityWidget />
         <PhoneWidget />
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ''} />
       </body>
     </html>
   );

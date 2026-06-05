@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleMap, useLoadScript, Autocomplete, Libraries } from '@react-google-maps/api';
+import { sendGAEvent } from '@next/third-parties/google';
 import {
     Users, Briefcase, Clock,
     MapPin, CheckCircle2, Plane, Car, Plus, Minus, Info, Search, Loader2, User, Phone
@@ -280,6 +281,24 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
             .replace('{9}', recommendedPickupTime);
 
         const encodedMessage = encodeURIComponent(message);
+
+        // Send lead generation event to GA4
+        sendGAEvent({
+            event: 'generate_lead',
+            value: {
+                currency: 'ILS',
+                value: price,
+                lead_type: 'calculator_booking',
+                pickup_location: originName,
+                vehicle_type: breakdown?.vehicleName,
+                passengers_count: passengers,
+                luggage_count: luggage,
+                use_route6: useRoute6 ? 'yes' : 'no',
+                use_babyseat: babySeat ? 'yes' : 'no',
+                pickup_time: recommendedPickupTime
+            }
+        });
+
         window.open(`https://wa.me/972547438110?text=${encodedMessage}`, '_blank');
 
         setIsSubmitting(false);

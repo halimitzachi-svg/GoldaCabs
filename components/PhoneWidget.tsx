@@ -1,11 +1,13 @@
 'use client';
 
 import { Phone } from 'lucide-react';
+import { sendGAEvent } from '@next/third-parties/google';
 
 export default function PhoneWidget() {
     return (
         <a
             href="tel:0547438110"
+            onClick={() => sendGAEvent({ event: 'click_phone_widget', value: { click_type: 'quick_call' } })}
             className="fixed bottom-4 right-4 z-50 bg-gold text-black p-4 rounded-full shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all hover:scale-110 active:scale-95 group animate-bounce-subtle"
             aria-label="Call Golda Cabs"
         >

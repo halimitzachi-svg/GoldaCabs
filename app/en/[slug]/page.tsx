@@ -36,6 +36,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             description,
             locale: 'en_IL',
             type: 'website',
+            images: [
+                {
+                    url: '/og-image.png',
+                    width: 1200,
+                    height: 630,
+                    alt: `Taxi from ${cityData.name} to Ben Gurion Airport | GoldaCabs`,
+                }
+            ]
         },
         keywords: [`taxi from ${cityData.name} to tlv`, `taxi ${cityData.name}`, 'airport transfer israel', 'golda cabs'],
         alternates: {
@@ -64,13 +72,22 @@ export default async function CityPageEn({ params }: Props) {
 
     const t = dictionary['en'].city_page;
 
+    const faqs = [
+        { q: `How much is a taxi from ${cityData.name} to Ben Gurion Airport?`, a: `Prices start from ${cityData.price}ILS. The final price depends on time of day (night tariff), number of passengers, and luggage. Use our calculator for an instant quote.` },
+        { q: `How far in advance should I book?`, a: `We recommend booking at least 24 hours in advance, especially during holidays. However, we also accept last-minute bookings subject to availability.` },
+        { q: `How can I pay for the ride?`, a: `We accept multiple payment methods for your convenience: Cash, and mobile payment apps like Bit and Paybox.` },
+        { q: `Do your drivers speak English?`, a: `Yes, most of our drivers speak fluent English and are experienced in serving international travelers.` }
+    ];
+
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'Service',
         'serviceType': 'Taxi Service',
         'provider': {
             '@type': 'TaxiService',
-            'name': 'GoldaCabs'
+            'name': 'GoldaCabs',
+            'telephone': '+972-54-743-8110',
+            'url': 'https://www.goldacabs.co.il'
         },
         'areaServed': {
             '@type': 'City',
@@ -82,7 +99,27 @@ export default async function CityPageEn({ params }: Props) {
             '@type': 'Offer',
             'price': cityData.price,
             'priceCurrency': 'ILS'
+        },
+        'aggregateRating': {
+            '@type': 'AggregateRating',
+            'ratingValue': '4.9',
+            'ratingCount': '124',
+            'bestRating': '5',
+            'worstRating': '1'
         }
+    };
+
+    const faqJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': faqs.map(faq => ({
+            '@type': 'Question',
+            'name': faq.q,
+            'acceptedAnswer': {
+                '@type': 'Answer',
+                'text': faq.a
+            }
+        }))
     };
 
     return (
@@ -90,6 +127,10 @@ export default async function CityPageEn({ params }: Props) {
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
             />
 
             <Hero lang="en" isSubPage={true} />
@@ -198,12 +239,7 @@ export default async function CityPageEn({ params }: Props) {
                         <div className="mt-12 space-y-4">
                             <h2 className="text-3xl font-bold text-center mb-8">{t.faq_title}</h2>
 
-                            {[
-                                { q: `How much is a taxi from ${cityData.name} to Ben Gurion Airport?`, a: `Prices start from ${cityData.price}ILS. The final price depends on time of day (night tariff), number of passengers, and luggage. Use our calculator for an instant quote.` },
-                                { q: `How far in advance should I book?`, a: `We recommend booking at least 24 hours in advance, especially during holidays. However, we also accept last-minute bookings subject to availability.` },
-                                { q: `How can I pay for the ride?`, a: `We accept multiple payment methods for your convenience: Cash, and mobile payment apps like Bit and Paybox.` },
-                                { q: `Do your drivers speak English?`, a: `Yes, most of our drivers speak fluent English and are experienced in serving international travelers.` }
-                            ].map((faq, idx) => (
+                            {faqs.map((faq, idx) => (
                                 <details key={idx} className="group bg-surface border border-white/5 rounded-xl">
                                     <summary className="flex justify-between items-center font-medium cursor-pointer list-none p-4 text-white group-hover:text-gold transition-colors">
                                         <span>{faq.q}</span>

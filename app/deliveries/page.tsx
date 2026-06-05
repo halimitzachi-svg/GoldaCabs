@@ -2,6 +2,7 @@ import Hero from "@/components/Hero";
 import { Package, Zap, ShieldCheck, MapPin, ArrowRight } from "lucide-react";
 import { dictionary } from "@/lib/dictionary";
 import Link from "next/link";
+import AnalyticsLink from "@/components/AnalyticsLink";
 
 export const metadata = {
     title: 'משלוחים במונית אקספרס מהיום להיום | מוניות גולדה',
@@ -38,15 +39,19 @@ export default function DeliveriesPage() {
                         {t.subtitle}
                     </p>
                     <div className="pt-4">
-                        <a
+                        <AnalyticsLink
                             href="https://wa.me/972547438110?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%94%D7%96%D7%9E%D7%99%D7%9F%20%D7%9E%D7%A9%D7%9C%D7%95%D7%97%20%D7%90%D7%A7%D7%A1%D7%A4%D7%A8%D7%A1"
+                            eventName="click_whatsapp_deliveries"
+                            eventParams={{
+                                link_type: 'whatsapp_deliveries_order'
+                            }}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-3 bg-gold hover:bg-gold-dark text-black px-10 py-5 rounded-2xl font-bold text-lg transition-all shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:scale-105 active:scale-95"
                         >
                             {t.cta}
                             <ArrowRight className="w-5 h-5 rotate-180" />
-                        </a>
+                        </AnalyticsLink>
                     </div>
                 </div>
             </div>

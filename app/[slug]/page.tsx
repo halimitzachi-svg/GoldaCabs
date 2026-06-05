@@ -36,6 +36,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             description,
             locale: 'he_IL',
             type: 'website',
+            images: [
+                {
+                    url: '/og-image.png',
+                    width: 1200,
+                    height: 630,
+                    alt: `מוניות ${cityData.name} לנתב"ג | מוניות גולדה`,
+                }
+            ]
         },
         keywords: [`מונית מ${cityData.name} לנתב"ג`, `מוניות ${cityData.name}`, 'הסעה לנתב"ג', 'מונית גדולה לשדה התעופה', cityData.name],
         alternates: {
@@ -62,13 +70,22 @@ export default async function CityPage({ params }: Props) {
         notFound();
     }
 
+    const faqs = [
+        { q: `כמה עולה מונית מ${cityData.name} לנתב"ג?`, a: `המחיר לנסיעה מ${cityData.name} לנתב"ג מתחיל ב-${cityData.price}₪ לנסיעה רגילה בשעות היום. המחיר עשוי להשתנות בהתאם לשעות הלילה (תעריף ב'), כמות הנוסעים והמזוודות. מומלץ להשתמש במחשבון באתר לקבלת מחיר מדויק.` },
+        { q: `כמה זמן מראש צריך להזמין מונית מ${cityData.name}?`, a: `אנו ממליצים להזמין מונית כ-24 שעות מראש, במיוחד בעונות התיירות העמוסות. עם זאת, במוניות גולדה אנו ערוכים גם לקריאות מיידיות מ${cityData.name} בכפוף לזמינות.` },
+        { q: `כיצד ניתן לשלם עבור הנסיעה?`, a: `אנו מקבלים תשלום במגוון אמצעים: במזומן, באפליקציית Bit ו-Paybox, מה שמאפשר לכם גמישות מקסימלית ותהליך תשלום פשוט ונוח.` },
+        { q: `האם יש לכם נהגים דוברי אנגלית ב${cityData.name}?`, a: `כן, רבים מהנהגים שלנו ב${cityData.name} דוברים אנגלית ושפות נוספות, ומורגלים במתן שירות לתיירים ואנשי עסקים.` }
+    ];
+
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'Service',
         'serviceType': 'Taxi Service',
         'provider': {
             '@type': 'TaxiService',
-            'name': 'מוניות גולדה'
+            'name': 'מוניות גולדה',
+            'telephone': '+972-54-743-8110',
+            'url': 'https://www.goldacabs.co.il'
         },
         'areaServed': {
             '@type': 'City',
@@ -80,7 +97,27 @@ export default async function CityPage({ params }: Props) {
             '@type': 'Offer',
             'price': cityData.price,
             'priceCurrency': 'ILS'
+        },
+        'aggregateRating': {
+            '@type': 'AggregateRating',
+            'ratingValue': '4.9',
+            'ratingCount': '124',
+            'bestRating': '5',
+            'worstRating': '1'
         }
+    };
+
+    const faqJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': faqs.map(faq => ({
+            '@type': 'Question',
+            'name': faq.q,
+            'acceptedAnswer': {
+                '@type': 'Answer',
+                'text': faq.a
+            }
+        }))
     };
 
     return (
@@ -88,6 +125,10 @@ export default async function CityPage({ params }: Props) {
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
             />
 
             <Hero lang="he" isSubPage={true} />
@@ -196,12 +237,7 @@ export default async function CityPage({ params }: Props) {
                         <div className="mt-16 space-y-4">
                             <h2 className="text-3xl font-bold text-center mb-8">שאלות נפוצות על הסעות מ{cityData.name} לנתב"ג</h2>
 
-                            {[
-                                { q: `כמה עולה מונית מ${cityData.name} לנתב"ג?`, a: `המחיר לנסיעה מ${cityData.name} לנתב"ג מתחיל ב-${cityData.price}₪ לנסיעה רגילה בשעות היום. המחיר עשוי להשתנות בהתאם לשעות הלילה (תעריף ב'), כמות הנוסעים והמזוודות. מומלץ להשתמש במחשבון באתר לקבלת מחיר מדויק.` },
-                                { q: `כמה זמן מראש צריך להזמין מונית מ${cityData.name}?`, a: `אנו ממליצים להזמין מונית כ-24 שעות מראש, במיוחד בעונות התיירות העמוסות. עם זאת, במוניות גולדה אנו ערוכים גם לקריאות מיידיות מ${cityData.name} בכפוף לזמינות.` },
-                                { q: `כיצד ניתן לשלם עבור הנסיעה?`, a: `אנו מקבלים תשלום במגוון אמצעים: במזומן, באפליקציית Bit ו-Paybox, מה שמאפשר לכם גמישות מקסימלית ותהליך תשלום פשוט ונוח.` },
-                                { q: `האם יש לכם נהגים דוברי אנגלית ב${cityData.name}?`, a: `כן, רבים מהנהגים שלנו ב${cityData.name} דוברים אנגלית ושפות נוספות, ומורגלים במתן שירות לתיירים ואנשי עסקים.` }
-                            ].map((faq, idx) => (
+                            {faqs.map((faq, idx) => (
                                 <details key={idx} className="group bg-surface border border-white/5 rounded-xl">
                                     <summary className="flex justify-between items-center font-medium cursor-pointer list-none p-4 text-white group-hover:text-gold transition-colors">
                                         <span>{faq.q}</span>

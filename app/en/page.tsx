@@ -2,6 +2,7 @@ import Hero from "@/components/Hero";
 import Testimonials from "@/components/Testimonials";
 import FAQ from "@/components/FAQ";
 import type { Metadata } from 'next';
+import { dictionary } from '@/lib/dictionary';
 
 export const metadata: Metadata = {
     title: 'GoldaCabs | Premium Airport Taxi to Ben Gurion (TLV) 24/7',
@@ -12,6 +13,14 @@ export const metadata: Metadata = {
         description: 'Book your ride to Ben Gurion Airport in seconds. Reliable, professional, and fair prices.',
         locale: 'en_IL',
         type: 'website',
+        images: [
+            {
+                url: '/og-image.png',
+                width: 1200,
+                height: 630,
+                alt: 'GoldaCabs | Premium Airport Taxi VIP',
+            }
+        ]
     },
     alternates: {
         canonical: 'https://www.goldacabs.co.il/en',
@@ -31,7 +40,7 @@ export default function HomeEn() {
         '@type': 'TaxiService',
         'name': 'GoldaCabs',
         'url': 'https://www.goldacabs.co.il/en',
-        'image': 'https://www.goldacabs.co.il/og-image.jpg',
+        'image': 'https://www.goldacabs.co.il/og-image.png',
         'description': 'Premium taxi service to Ben Gurion Airport and across Israel. Luxury cars, English speaking drivers.',
         'telephone': '+972-54-743-8110',
         'areaServed': [
@@ -50,7 +59,27 @@ export default function HomeEn() {
             'closes': '23:59'
         },
         'availableLanguage': ['English', 'Hebrew'],
-        'serviceType': 'Airport Shuttle'
+        'serviceType': 'Airport Shuttle',
+        'aggregateRating': {
+            '@type': 'AggregateRating',
+            'ratingValue': '4.9',
+            'ratingCount': '124',
+            'bestRating': '5',
+            'worstRating': '1'
+        }
+    };
+
+    const faqJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': dictionary.en.faq.questions.map(item => ({
+            '@type': 'Question',
+            'name': item.q,
+            'acceptedAnswer': {
+                '@type': 'Answer',
+                'text': item.a
+            }
+        }))
     };
 
     return (
@@ -58,6 +87,10 @@ export default function HomeEn() {
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
             />
             <Hero lang="en" />
 
