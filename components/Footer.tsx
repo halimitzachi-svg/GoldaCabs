@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Phone, MessageCircle, Clock, ShieldCheck, ExternalLink } from 'lucide-react';
 import { CITIES } from '@/lib/cities';
+import { SITE_CONFIG } from '@/lib/site-config';
 
-export default function Footer() {
+export default function Footer({ lang }: { lang?: 'he' | 'en' }) {
     const currentYear = new Date().getFullYear();
     const pathname = usePathname();
-    const isEn = pathname?.startsWith('/en');
+    const isEn = lang ? lang === 'en' : pathname?.startsWith('/en');
 
     const regions = {
         sharon: isEn
@@ -25,12 +27,89 @@ export default function Footer() {
     };
 
     return (
-        <footer className="bg-dark-bg text-gray-500 pt-12 pb-32 border-t border-white/10">
+        <footer className="bg-dark-bg text-gray-500 pt-16 pb-32 border-t border-white/10" dir={isEn ? 'ltr' : 'rtl'}>
             <div className="container mx-auto px-4">
+
+                {/* NAP & Business Identity Block (Service Area Business Standard) */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 mb-12 border-b border-white/10 text-sm">
+                    <div className="space-y-3">
+                        <h4 className="text-white font-bold text-base flex items-center gap-2">
+                            <span className="text-gold">★</span>
+                            <span>{isEn ? SITE_CONFIG.nameEn : SITE_CONFIG.name}</span>
+                        </h4>
+                        <p className="text-gray-400 text-xs leading-relaxed">
+                            {isEn
+                                ? 'VIP taxi and transfer service to Ben Gurion Airport (TLV) and across Israel. Modern fleet, fixed transparent fares.'
+                                : 'שירות הסעות VIP לנתב"ג ולכל רחבי הארץ. נהג אישי, רכבים חדישים ומרווחים, ומחירים שקופים ללא הפתעות.'}
+                        </p>
+                    </div>
+
+                    <div className="space-y-3">
+                        <h5 className="text-white text-xs font-bold uppercase tracking-wider">
+                            {isEn ? 'Contact & Booking' : 'יצירת קשר והזמנות'}
+                        </h5>
+                        <div className="space-y-2 text-xs">
+                            <a
+                                href={`tel:${SITE_CONFIG.phone}`}
+                                className="flex items-center gap-2 text-gray-300 hover:text-gold transition-colors font-semibold"
+                            >
+                                <Phone className="w-3.5 h-3.5 text-gold" />
+                                <span>{SITE_CONFIG.phoneDisplay}</span>
+                            </a>
+                            <a
+                                href={`https://wa.me/${SITE_CONFIG.whatsappNumber}?text=${encodeURIComponent(
+                                    isEn ? "Hi GoldaCabs, I'd like to book a taxi" : "היי מוניות גולדה, אשמח להזמין מונית"
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-gray-300 hover:text-green-400 transition-colors"
+                            >
+                                <MessageCircle className="w-3.5 h-3.5 text-green-400" />
+                                <span>{isEn ? 'WhatsApp Direct Chat' : 'צ\'אט ישיר בוואטסאפ'}</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        <h5 className="text-white text-xs font-bold uppercase tracking-wider">
+                            {isEn ? 'Availability & Service Area' : 'שעות פעילות ואזורי שירות'}
+                        </h5>
+                        <div className="space-y-1.5 text-xs text-gray-400">
+                            <div className="flex items-center gap-2">
+                                <Clock className="w-3.5 h-3.5 text-gold" />
+                                <span>{isEn ? '24/7 Available (All Days & Nights)' : 'זמינות 24/7 (ימים, לילות, שבת וחג)'}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <ShieldCheck className="w-3.5 h-3.5 text-gold" />
+                                <span>{isEn ? 'Nationwide Coverage (Airport Focus)' : 'שירות מכל אזורי המרכז, השרון, הצפון והדרום'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        <h5 className="text-white text-xs font-bold uppercase tracking-wider">
+                            {isEn ? 'Payments & Trust' : 'אמצעי תשלום ואמון'}
+                        </h5>
+                        <p className="text-gray-400 text-xs">
+                            {isEn ? 'Cash, Bit, Paybox' : 'תשלום במזומן, באפליקציית Bit או Paybox.'}
+                        </p>
+                        {SITE_CONFIG.googleReviewsUrl && (
+                            <a
+                                href={SITE_CONFIG.googleReviewsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline pt-1"
+                            >
+                                <span>{isEn ? 'Verified Google Reviews' : 'ביקורות מאומתות ב-Google'}</span>
+                                <ExternalLink className="w-3 h-3" />
+                            </a>
+                        )}
+                    </div>
+                </div>
 
                 {/* Cities Grid for SEO - Grouped by Region */}
                 <div className="mb-12 border-b border-white/5 pb-12">
-                    <h3 className="text-gold text-sm font-bold mb-6 text-center md:text-right uppercase tracking-wider">
+                    <h3 className="text-gold text-sm font-bold mb-6 text-center md:text-start uppercase tracking-wider">
                         {isEn ? 'Popular Service Areas' : 'אזורי שירות פופולריים'}
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -48,8 +127,7 @@ export default function Footer() {
                                         >
                                             {isEn
                                                 ? `Taxi ${CITIES[cityKey].en.name} to TLV`
-                                                : `מונית מ${CITIES[cityKey].he.name} לנתב"ג`
-                                            }
+                                                : `מונית מ${CITIES[cityKey].he.name} לנתב"ג`}
                                         </Link>
                                     ))}
                                 </div>
@@ -58,31 +136,28 @@ export default function Footer() {
                     </div>
                 </div>
 
+                {/* Legal, Accessibility & Copyright */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-sm">
-
-                    {/* Brand / Copyright */}
                     <div className={`text-center ${isEn ? 'md:text-left' : 'md:text-right'}`}>
-                        <p>&copy; {currentYear} GoldaCabs. {isEn ? 'All rights reserved.' : 'כל הזכויות שמורות.'}</p>
-                        <p className="mt-1 text-xs text-gray-600">Premium Airport Taxi Service</p>
+                        <p>&copy; {currentYear} {isEn ? SITE_CONFIG.nameEn : SITE_CONFIG.name}. {isEn ? 'All rights reserved.' : 'כל הזכויות שמורות.'}</p>
+                        <p className="mt-1 text-xs text-gray-600">VIP Ben Gurion Airport Transfer Service</p>
                     </div>
 
-                    {/* Links */}
-                    <div className="flex gap-6">
+                    <div className="flex flex-wrap gap-6 justify-center">
                         <Link href="/deliveries" className="hover:text-gold transition-colors font-medium">
-                            {isEn ? 'Deliveries' : 'משלוחים במונית'}
+                            {isEn ? 'Express Deliveries' : 'משלוחים במונית'}
                         </Link>
                         <Link href="/legal" className="hover:text-gold transition-colors">
                             {isEn ? 'Legal & Privacy' : 'תנאי שימוש ופרטיות'}
                         </Link>
-                        {/* Accessibility - we have the widget, but a link is nice too */}
                         <button
+                            type="button"
                             onClick={() => document.querySelector<HTMLElement>('button[aria-label="Accessibility Menu"]')?.click()}
-                            className="hover:text-gold transition-colors"
+                            className="hover:text-gold transition-colors cursor-pointer"
                         >
                             {isEn ? 'Accessibility' : 'הצהרת נגישות'}
                         </button>
                     </div>
-
                 </div>
             </div>
         </footer>

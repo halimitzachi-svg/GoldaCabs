@@ -9,8 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^2.1.1",
     "@next/third-parties": "^16.2.7",
-    "@react-google-maps/api": "^2.20.8",
     "cmdk": "^1.1.1",
     "framer-motion": "^12.29.2",
     "lucide-react": "^0.563.0",

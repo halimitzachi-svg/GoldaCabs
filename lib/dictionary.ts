@@ -29,13 +29,13 @@ export const dictionary = {
             shabbat_tariff: "תעריף שבת/חג שיא כלול (ג')",
             route6_fee: "תוספת כביש 6",
             baby_seat_fee: "תוספת כסא תינוק",
-            total: "סה\"כ לתשלום (לא סופי)",
+            total: "סה\"כ לתשלום (הערכה)",
             vat_included: "כולל מע\"מ",
             submit_btn: "הזמן מונית בוואטסאפ",
             submitting: "מכין להזמנה...",
             loading_map: "טוען מפות...",
             error_details: "נא למלא שם וטלפון תקינים",
-            disclaimer: "* המחיר המוצג הינו להערכה ראשונית בלבד ואינו סופי, ואינו מהווה מחיר מחייב.",
+            disclaimer: "* הערכת מחיר שקופה — המחיר הסופי מתואם מראש לפני הנסיעה.",
             whatsapp_msg: `היי מוניות גולדה, אשמח להזמין מונית.
 שם: {0}
 עיר: {10}
@@ -46,7 +46,7 @@ export const dictionary = {
 מזוודות: {5}
 כסא תינוק: {7}
 כביש 6: {8}
-מחיר לא סופי באתר: {6}₪`
+הערכת מחיר באתר: {6}₪`
         },
         city_page: {
             title: "מונית מ{city} לנתב\"ג",
@@ -54,7 +54,7 @@ export const dictionary = {
             duration: "זמן נסיעה משוער",
             pickup: "איסוף מהבית",
             pickup_desc: "נהג ימתין לך בכתובת המדויקת",
-            price_fair: "מחיר הוגן וקבוע",
+            price_fair: "הערכת מחיר שקופה",
             price_start: "החל מ-",
             why_us_title: "למה לבחור במוניות גולדה?",
             availability: "זמינות 24/7",
@@ -136,13 +136,13 @@ export const dictionary = {
             shabbat_tariff: 'Shabbat Peak Rate Included (C)',
             route6_fee: 'Highway 6 Toll',
             baby_seat_fee: 'Baby Seat Fee',
-            total: 'Total Non-Final Price',
+            total: 'Estimated Total Fare',
             vat_included: 'VAT Included',
             submit_btn: 'Book Taxi Now',
             submitting: 'Booking...',
             loading_map: 'Loading Maps...',
             error_details: 'Please fill name and phone to book',
-            disclaimer: "* The price shown is an initial non-final estimate based on your trip data and is not a binding final price.",
+            disclaimer: "* Transparent price estimate — the final price is confirmed in advance before the trip.",
             whatsapp_msg: `Hi GoldaCabs, I'd like to book a taxi.
 Name: {0}
 City: {10}
@@ -153,7 +153,7 @@ Passengers: {4}
 Luggage: {5}
 Baby Seat: {7}
 Highway 6: {8}
-Non-Final Website Price: {6}ILS`
+Website Price Estimate: {6}ILS`
         },
         city_page: {
             title_prefix: 'Taxi from',
@@ -161,7 +161,7 @@ Non-Final Website Price: {6}ILS`
             duration: 'Est. Travel Time',
             pickup: 'Door-to-Door',
             pickup_desc: 'From any address directly to Terminal 3',
-            price_fair: 'Fair Price',
+            price_fair: 'Transparent Estimate',
             price_start: 'From ',
             why_us_title: 'Why choose GoldaCabs?',
             availability: '24/7 Availability',
@@ -181,7 +181,7 @@ Non-Final Website Price: {6}ILS`
                 },
                 {
                     q: "Do you have large taxis for families?",
-                    a: "Yes. Our fleet includes standard sedans as well as large minivans that can accommodate up to 610 passengers with multiple suitcases."
+                    a: "Yes. Our fleet includes standard sedans as well as large minivans that can accommodate up to 6–10 passengers with multiple suitcases."
                 },
                 {
                     q: "How far in advance should I book?",

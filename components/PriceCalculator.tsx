@@ -1,48 +1,69 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GoogleMap, useLoadScript, Autocomplete, Libraries } from '@react-google-maps/api';
 import { sendGAEvent } from '@next/third-parties/google';
 import {
     Users, Briefcase, Clock,
-    MapPin, CheckCircle2, Plane, Car, Plus, Minus, Info, Search, Loader2, User, Phone
+    MapPin, CheckCircle2, Plane, Car, Plus, Minus, Info, Loader2, User, Phone, AlertCircle
 } from 'lucide-react';
-import { CITIES_DATA, PRICING_CONSTANTS, getDistanceMultiplier, type CityData } from '@/data/cities';
+import { PRICING_CONSTANTS, getDistanceMultiplier } from '@/data/cities';
+import { CITIES } from '@/lib/cities';
 import { dictionary, Locale } from '@/lib/dictionary';
+import AddressAutocomplete from './AddressAutocomplete';
 
-const libraries: Libraries = ["places"];
+export interface PriceCalculatorProps {
+    lang?: Locale;
+    citySlug?: string; // e.g. "netanya" or "taxi-netanya"
+}
 
-export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
+export default function PriceCalculator({
+    lang = 'he',
+    citySlug
+}: PriceCalculatorProps) {
     const t = dictionary[lang].calculator;
     const isRTL = lang === 'he';
 
-    const { isLoaded } = useLoadScript({
-        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || "",
-        libraries,
-    });
+    // Normalize slug (strip any "taxi-" prefix)
+    const cleanCityKey = citySlug ? citySlug.replace(/^taxi-/, '').toLowerCase() : undefined;
+    const rawCityEntry = cleanCityKey ? CITIES[cleanCityKey] : undefined;
+    const cityEntry = rawCityEntry ? (lang === 'he' ? rawCityEntry.he : rawCityEntry.en) : undefined;
 
-    const [originName, setOriginName] = useState('');
-    const [cityName, setCityName] = useState('');
-    const [distanceKm, setDistanceKm] = useState<number>(0);
+    // Calculator State Machine
+    const [calculatorState, setCalculatorState] = useState<'empty' | 'city_estimate' | 'exact_route'>(
+        cityEntry ? 'city_estimate' : 'empty'
+    );
+    const [hasVerifiedPlace, setHasVerifiedPlace] = useState(false);
+
+    // Location & Route
+    const [originName, setOriginName] = useState(cityEntry ? cityEntry.name : '');
+    const [cityName, setCityName] = useState(cityEntry ? cityEntry.name : '');
+    const [distanceKm, setDistanceKm] = useState<number>(cityEntry ? cityEntry.distance : 0);
+    const [activeRegion, setActiveRegion] = useState(cityEntry?.region || 'central');
+
+    // Trip Configuration
     const [passengers, setPassengers] = useState(1);
     const [luggage, setLuggage] = useState(1);
     const [flightTime, setFlightTime] = useState('');
-    const [price, setPrice] = useState(0);
     const [flightNumber, setFlightNumber] = useState('');
     const [useRoute6, setUseRoute6] = useState(false);
     const [babySeat, setBabySeat] = useState(false);
+
+    // Calculated Outputs
+    const [price, setPrice] = useState(0);
     const [breakdown, setBreakdown] = useState<any>(null);
     const [recommendedPickupTime, setRecommendedPickupTime] = useState('');
     const [tripDuration, setTripDuration] = useState(0);
-    const [activeRegion, setActiveRegion] = useState('north'); // Default to north as it's the "base"
-    const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
-    // User Details
+    // User Details & Form State
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<{ origin?: string; name?: string; phone?: string }>({});
+
+    // GA4 Deduplication Refs
+    const hasLoggedEstimateRef = useRef(false);
+    const hasStartedInputRef = useRef(false);
 
     // Initialize default flight time to tomorrow 10:00 AM
     useEffect(() => {
@@ -51,135 +72,109 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
         tomorrow.setHours(10, 0, 0, 0);
 
         const tzOffset = tomorrow.getTimezoneOffset() * 60000;
-        const localISOTime = (new Date(tomorrow.getTime() - tzOffset)).toISOString().slice(0, 16);
+        const localISOTime = new Date(tomorrow.getTime() - tzOffset).toISOString().slice(0, 16);
         setFlightTime(localISOTime);
     }, []);
 
-    // Update Route 6 default
+    // Send city_estimate_view once on mount if on city landing
+    useEffect(() => {
+        if (cityEntry && !hasLoggedEstimateRef.current) {
+            hasLoggedEstimateRef.current = true;
+            sendGAEvent({
+                event: 'city_estimate_view',
+                source_city: cleanCityKey || cityEntry.name,
+                page_type: 'city_landing',
+                calculator_state: 'city_estimate',
+                page_language: lang
+            });
+        }
+    }, [cityEntry, cleanCityKey, lang]);
+
+    // Update Route 6 default when distance changes
     useEffect(() => {
         if (distanceKm > 80) setUseRoute6(true);
-        else setUseRoute6(false);
+        else if (distanceKm < 35) setUseRoute6(false);
     }, [distanceKm]);
 
-    const onLoad = (autocomplete: google.maps.places.Autocomplete) => {
-        autocompleteRef.current = autocomplete;
-    };
+    // Handle Place Selection from AddressAutocomplete
+    const handlePlaceSelected = (data: {
+        address: string;
+        cityName: string;
+        distanceKm: number;
+        region: string;
+    }) => {
+        setOriginName(data.address);
+        setCityName(data.cityName || cityName);
+        setDistanceKm(data.distanceKm);
+        setActiveRegion(data.region);
+        setCalculatorState('exact_route');
+        setHasVerifiedPlace(true);
+        setErrors(prev => ({ ...prev, origin: undefined }));
 
-    const onPlaceChanged = () => {
-        if (autocompleteRef.current) {
-            const place = autocompleteRef.current.getPlace();
-            if (place.geometry && place.geometry.location) {
-                const addressComponents = place.address_components || [];
-                const fullName = place.name || '';
-                const fullAddress = place.formatted_address || '';
-
-                // Extract City Name
-                const cityComp = addressComponents.find(c =>
-                    c.types.includes('locality') ||
-                    c.types.includes('sublocality') ||
-                    c.types.includes('administrative_area_level_2')
-                );
-                const extractedCity = cityComp ? cityComp.long_name : '';
-                setCityName(extractedCity);
-
-                // Set full display address
-                const displayName = fullAddress || (extractedCity ? `${fullName}, ${extractedCity}` : fullName);
-                setOriginName(displayName);
-
-                let detectedRegion = 'north'; // Default
-
-                // Combine all searchable strings
-                const searchNames = [
-                    ...addressComponents.map(c => c.long_name),
-                    ...addressComponents.map(c => c.short_name),
-                    fullName,
-                    fullAddress
-                ];
-
-                const isCentral = searchNames.some(name =>
-                    /Tel Aviv|Central|מרכז|תל אביב|גוש דן|Ramat Gan|Givatayim|Bnei Brak|Holon|Bat Yam|ראשון לציון|Rishon|רמת גן|גבעתיים|בני ברק|חולון|בת ים|פתח תקווה|אלעד|ראש העין/i.test(name)
-                );
-                const isSharon = searchNames.some(name =>
-                    /Sharon|Netanya|Herzliya|Raanana|נתניה|הרצליה|רעננה|שרון|Hod HaSharon|Kfar Saba|כפר סבא|הוד השרון/i.test(name)
-                );
-                const isSouth = searchNames.some(name =>
-                    /South|Ashdod|Beersheba|Darom|אשדוד|באר שבע|דרום|Ashkelon|Rehovot|אשקלון|רחובות|נס ציונה|Ness Ziona|יבנה|Yavne/i.test(name)
-                );
-                const isJerusalem = searchNames.some(name =>
-                    /Jerusalem|ירושלים|Bet Shemesh|בית שמש/i.test(name)
-                );
-                const isNorthBase = searchNames.some(name =>
-                    /Haifa|חיפה|Krayot|קריות|Akko|עכו|Nahariya|נהריה|Tzafon|צפון/i.test(name)
-                );
-
-                if (isJerusalem) detectedRegion = 'jerusalem';
-                else if (isSouth) detectedRegion = 'south';
-                else if (isSharon) detectedRegion = 'sharon';
-                else if (isCentral) detectedRegion = 'central';
-                else if (isNorthBase) detectedRegion = 'north';
-                else detectedRegion = 'north';
-
-                console.log('--- Region Detection Debug ---');
-                console.log('Full Name:', fullName);
-                console.log('Full Address:', fullAddress);
-                console.log('All Searchable Parts:', searchNames);
-                console.log('Assigned Region:', detectedRegion);
-
-                setActiveRegion(detectedRegion);
-                calculateDistance(place.geometry.location);
-            }
-        }
-    };
-
-    const calculateDistance = (originLocation: google.maps.LatLng) => {
-        const service = new google.maps.DistanceMatrixService();
-        const tlvLocation = new google.maps.LatLng(32.0055, 34.8854); // Ben Gurion Airport
-
-        service.getDistanceMatrix({
-            origins: [originLocation],
-            destinations: [tlvLocation],
-            travelMode: google.maps.TravelMode.DRIVING,
-        }, (response: google.maps.DistanceMatrixResponse | null, status: google.maps.DistanceMatrixStatus) => {
-            if (status === 'OK' && response && response.rows[0].elements[0].distance) {
-                const distance = response.rows[0].elements[0].distance.value / 1000; // in km
-                setDistanceKm(distance);
-            }
+        sendGAEvent({
+            event: 'address_selected',
+            source_city: cleanCityKey || data.cityName || 'general',
+            page_type: cleanCityKey ? 'city_landing' : 'home',
+            calculator_state: 'exact_route',
+            page_language: lang
         });
     };
 
-    // Pricing Engine
+    // Handle Manual Text Editing - Immediately Invalidate Verification
+    const handleResetVerification = () => {
+        setHasVerifiedPlace(false);
+        if (cityEntry) {
+            setCalculatorState('city_estimate');
+            setDistanceKm(cityEntry.distance);
+        } else {
+            setCalculatorState('empty');
+            setDistanceKm(0);
+            setPrice(0);
+            setBreakdown(null);
+        }
+    };
+
+    // Pricing Calculation Engine
     useEffect(() => {
+        if (distanceKm <= 0) {
+            setPrice(0);
+            setBreakdown(null);
+            return;
+        }
+
         let kmRate = PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_1;
         let activeTariff = 'A';
 
         if (flightTime) {
             const flightDate = new Date(flightTime);
-
-            // 1. Calculate trip duration (Refined based on real-world averages)
-            // Without Route 6: ~0.9 min/km (avg 67km/h) + 15m buffer
-            // With Route 6: ~0.75 min/km (avg 80km/h) + 10m buffer
             const minPerKm = useRoute6 ? 0.75 : 0.9;
             const buffer = useRoute6 ? 10 : 15;
-            const tripDurationMin = (distanceKm * minPerKm) + buffer;
+            const tripDurationMin = distanceKm * minPerKm + buffer;
             setTripDuration(Math.round(tripDurationMin));
 
-            // 2. Pickup = Flight Time - 3 hours (180 min) - trip duration
-            const pickupDate = new Date(flightDate.getTime() - (180 * 60 * 1000) - (tripDurationMin * 60 * 1000));
+            // Pickup = Flight Time - 3 hours (180 min) - trip duration
+            const pickupDate = new Date(flightDate.getTime() - (180 + tripDurationMin) * 60 * 1000);
 
-            // Format for display and WA
-            const formattedPickup = pickupDate.toLocaleString('he-IL', {
-                day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+            const formattedPickup = pickupDate.toLocaleString(lang === 'he' ? 'he-IL' : 'en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
             });
             setRecommendedPickupTime(formattedPickup);
 
-            const tripArrivalDate = new Date(pickupDate.getTime() + (tripDurationMin * 60 * 1000));
+            const tripArrivalDate = new Date(pickupDate.getTime() + tripDurationMin * 60 * 1000);
 
             const getTariffAtTime = (date: Date) => {
                 const hour = date.getHours();
                 const day = date.getDay();
                 const isNight = hour >= 21 || hour < 6;
                 const isWeekendEarly = (day === 5 && hour >= 16) || (day === 6 && hour >= 6 && hour < 21);
-                const isShabbatPeak = (day === 5 && hour >= 21) || (day === 6 && hour < 6) || (day === 6 && hour >= 21) || (day === 0 && hour < 6);
+                const isShabbatPeak =
+                    (day === 5 && hour >= 21) ||
+                    (day === 6 && hour < 6) ||
+                    (day === 6 && hour >= 21) ||
+                    (day === 0 && hour < 6);
 
                 if (isShabbatPeak) return { rate: PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_3, label: 'C' };
                 if (isNight || isWeekendEarly) return { rate: PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_2, label: 'B' };
@@ -198,30 +193,23 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
             }
         }
 
-        // Find Vehicle Config based on both passengers and luggage
-        const vehicleConfig = PRICING_CONSTANTS.VEHICLE_TYPES.find(v =>
-            passengers <= v.maxPassengers && luggage <= v.maxLuggage
-        ) || PRICING_CONSTANTS.VEHICLE_TYPES[PRICING_CONSTANTS.VEHICLE_TYPES.length - 1];
+        const vehicleConfig =
+            PRICING_CONSTANTS.VEHICLE_TYPES.find(
+                v => passengers <= v.maxPassengers && luggage <= v.maxLuggage
+            ) || PRICING_CONSTANTS.VEHICLE_TYPES[PRICING_CONSTANTS.VEHICLE_TYPES.length - 1];
 
         const vehicleMultiplier = vehicleConfig.multiplier;
-
-        // Apply Dynamic Distance-Based Multiplier (Closer to airport = higher factor, min bound 1.3)
         const regionMultiplier = getDistanceMultiplier(distanceKm);
 
-        // Base Calculations
         const distancePrice = distanceKm * kmRate * vehicleMultiplier * regionMultiplier;
-
         const startPrice = PRICING_CONSTANTS.START_PRICE * vehicleMultiplier * regionMultiplier;
         const airportFee = PRICING_CONSTANTS.AIRPORT_FEE;
 
-        // Extras
-
-        // Dynamic Route 6 Pricing based on distance
         let route6Price = 0;
         if (useRoute6) {
             if (distanceKm < 35) route6Price = 20;
             else if (distanceKm < 80) route6Price = 40;
-            else route6Price = 50; // Haifa case refined
+            else route6Price = 50;
         }
 
         const route6Fee = route6Price;
@@ -229,49 +217,54 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
 
         let total = startPrice + distancePrice + airportFee + route6Fee + babySeatFee;
 
-        console.log('--- Price Calculation Debug ---');
-        console.log('Region Multiplier:', regionMultiplier, `(Area: ${activeRegion})`);
-        console.log('KM Rate:', kmRate);
-        console.log('Distance Price:', distancePrice);
-        console.log('Total Before Rounding:', total);
-
         // Round up to nearest 10
         total = Math.ceil(total / 10) * 10;
 
-        setPrice(total);
-        setBreakdown({
-            start: startPrice,
-            distance: distancePrice,
-            airport: airportFee,
-            vehicleName: lang === 'he' ? vehicleConfig.nameHe : vehicleConfig.nameEn,
-            vehicleMultiplier: vehicleMultiplier,
-            route6: route6Fee,
-            babySeat: babySeatFee,
-            tariff: activeTariff
-        });
+        if (Number.isFinite(total) && total > 0) {
+            setPrice(total);
+            setBreakdown({
+                start: startPrice,
+                distance: distancePrice,
+                airport: airportFee,
+                vehicleName: lang === 'he' ? vehicleConfig.nameHe : vehicleConfig.nameEn,
+                vehicleMultiplier,
+                route6: route6Fee,
+                babySeat: babySeatFee,
+                tariff: activeTariff
+            });
+        }
+    }, [distanceKm, passengers, luggage, flightTime, useRoute6, babySeat, lang]);
 
-    }, [distanceKm, passengers, luggage, flightTime, useRoute6, babySeat, lang, activeRegion]);
-
+    // Handle WhatsApp Lead Booking
     const handleBooking = () => {
         const newErrors: { origin?: string; name?: string; phone?: string } = {};
 
-        // Basic Validation
-        if (!originName || originName.length < 3) {
-            newErrors.origin = lang === 'he' ? 'נא לבחור כתובת איסוף מהרשימה' : 'Please select a pickup address';
+        // Lock if place is not verified from Google Places
+        if (!hasVerifiedPlace) {
+            newErrors.origin = isRTL
+                ? `נא לבחור כתובת מדויקת מתוך הרשימה ב${cityName || 'עיר'} לקבלת מחיר סופי ומסלול`
+                : `Please select an exact address from the list in ${cityName || 'the city'} for final fare`;
         }
 
         if (!name || name.trim().length < 2) {
-            newErrors.name = lang === 'he' ? 'שם קצר מדי' : 'Name is too short';
+            newErrors.name = isRTL ? 'נא להזין שם מלא' : 'Name is required';
         }
 
-        // Phone validation (Israeli format 05... or international with +)
         const phoneRegex = /^(?:05[0-9]{8}|\+?[1-9][0-9]{7,14})$/;
         if (!phone || !phoneRegex.test(phone.replace(/[-\s]/g, ''))) {
-            newErrors.phone = lang === 'he' ? 'מספר טלפון לא תקין' : 'Invalid phone number';
+            newErrors.phone = isRTL ? 'מספר טלפון לא תקין' : 'Invalid phone number';
         }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
+            sendGAEvent({
+                event: 'calculator_validation_error',
+                source_city: cleanCityKey || cityName || 'general',
+                page_type: cleanCityKey ? 'city_landing' : 'home',
+                calculator_state: calculatorState,
+                error_fields: Object.keys(newErrors).join(','),
+                page_language: lang
+            });
             return;
         }
 
@@ -286,81 +279,133 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
             .replace('{1}', originName)
             .replace('{2}', flightTime.replace('T', ' '))
             .replace('{3}', flightNumber || '-')
-            .replace('{4}', `${passengers} (${breakdown?.vehicleName})`)
+            .replace('{4}', `${passengers} (${breakdown?.vehicleName || 'Standard'})`)
             .replace('{5}', luggage.toString())
             .replace('{6}', price.toString())
-            .replace('{7}', babySeat ? (lang === 'he' ? 'כן' : 'Yes') : (lang === 'he' ? 'לא' : 'No'))
-            .replace('{8}', useRoute6 ? (lang === 'he' ? 'כן' : 'Yes') : (lang === 'he' ? 'לא' : 'No'))
+            .replace('{7}', babySeat ? (isRTL ? 'כן' : 'Yes') : (isRTL ? 'לא' : 'No'))
+            .replace('{8}', useRoute6 ? (isRTL ? 'כן' : 'Yes') : (isRTL ? 'לא' : 'No'))
             .replace('{9}', recommendedPickupTime)
             .replace('{10}', displayCity);
 
         const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/972547438110?text=${encodedMessage}`;
 
-        // Send lead generation event to GA4
-        sendGAEvent({
-            event: 'generate_lead',
-            value: {
+        const newWindow = window.open(whatsappUrl, '_blank');
+
+        // Fire generate_lead strictly if window open was initiated
+        if (newWindow !== null) {
+            sendGAEvent({
+                event: 'generate_lead',
                 currency: 'ILS',
-                value: price,
-                lead_type: 'calculator_booking',
+                value: Number.isFinite(price) ? Number(price) : 0,
+                source_city: cleanCityKey || derivedCity || 'general',
+                page_type: cleanCityKey ? 'city_landing' : 'home',
+                calculator_state: calculatorState,
+                cta_location: 'calculator',
+                contact_method: 'whatsapp',
                 pickup_location: originName,
                 vehicle_type: breakdown?.vehicleName,
                 passengers_count: passengers,
                 luggage_count: luggage,
                 use_route6: useRoute6 ? 'yes' : 'no',
                 use_babyseat: babySeat ? 'yes' : 'no',
-                pickup_time: recommendedPickupTime
-            }
-        });
-
-        window.open(`https://wa.me/972547438110?text=${encodedMessage}`, '_blank');
+                pickup_time: recommendedPickupTime,
+                page_language: lang
+            });
+        }
 
         setIsSubmitting(false);
     };
 
+    // Safe mathematical readiness check: NEVER allow NaN or ₪0
+    const isPriceReady =
+        hasVerifiedPlace &&
+        breakdown &&
+        Number.isFinite(breakdown.distance) &&
+        Number.isFinite(breakdown.start) &&
+        Number.isFinite(price) &&
+        price > 0 &&
+        Number.isFinite(distanceKm) &&
+        distanceKm > 0;
+
     return (
-        <div className={`w-full bg-surface/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl relative overflow-visible group ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-            {/* Glow */}
-            <div className={`absolute -top-20 w-40 h-40 bg-gold/20 rounded-full blur-3xl pointer-events-none group-hover:bg-gold/30 transition-all duration-500 overflow-hidden ${isRTL ? '-left-20' : '-right-20'}`} />
+        <div
+            className={`w-full bg-surface/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl relative overflow-visible group ${isRTL ? 'text-right' : 'text-left'}`}
+            dir={isRTL ? 'rtl' : 'ltr'}
+        >
+            {/* Background Glow */}
+            <div
+                className={`absolute -top-20 w-40 h-40 bg-gold/20 rounded-full blur-3xl pointer-events-none group-hover:bg-gold/30 transition-all duration-500 overflow-hidden ${isRTL ? '-left-20' : '-right-20'}`}
+            />
 
             <div className="relative z-10 space-y-6">
-
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                        <Clock className="w-6 h-6 text-gold" />
+                {/* Header with state indicator */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-4">
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-gold" />
                         {t.title}
                     </h2>
+
+                    {cityEntry && (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-gold text-xs font-medium">
+                            <MapPin className="w-3.5 h-3.5" />
+                            <span>{cityEntry.name} ({cityEntry.distance} {isRTL ? 'ק"מ' : 'km'})</span>
+                        </div>
+                    )}
                 </div>
 
-                {/* Origin Selection - Google Autocomplete */}
-                <div className="space-y-2 relative">
-                    <label className="text-sm text-gray-400">{t.pickup_label}</label>
-                    <div className="relative">
-                        {isLoaded ? (
-                            <Autocomplete
-                                onLoad={onLoad}
-                                onPlaceChanged={onPlaceChanged}
-                                fields={["geometry.location", "formatted_address", "name", "address_components"]}
-                            >
-                                <input
-                                    type="text"
-                                    placeholder={t.pickup_placeholder}
-                                    className={`w-full bg-dark-bg/50 border ${errors.origin ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:border-gold/50 outline-none placeholder:text-gray-600 ${isRTL ? 'pl-10' : 'pr-10'}`}
-                                    onChange={(e) => {
-                                        setOriginName(e.target.value);
-                                        setErrors({ ...errors, origin: undefined });
-                                    }}
-                                />
-                            </Autocomplete>
-                        ) : (
-                            <div className={`w-full bg-dark-bg/50 border border-white/10 rounded-xl px-4 py-3 text-gray-500 flex items-center gap-2 ${isRTL ? 'pl-10' : 'pr-10'}`}>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                {t.loading_map}
-                            </div>
-                        )}
-                        <MapPin className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 pointer-events-none ${isRTL ? 'left-4' : 'right-4'}`} />
+                {/* City Baseline Guidance Alert */}
+                {cityEntry && !hasVerifiedPlace && (
+                    <div className="bg-gold/10 border border-gold/20 rounded-2xl p-3 flex items-center gap-3 text-xs text-gold/90">
+                        <Info className="w-4 h-4 shrink-0 text-gold" />
+                        <span>
+                            {isRTL
+                                ? `מוצגת הערכת מחיר ממרכז ${cityEntry.name}. בחרו כתובת מדויקת לקבלת מחיר סופי ומסלול.`
+                                : `Showing baseline estimate from central ${cityEntry.name}. Select an exact address for final route & fare.`}
+                        </span>
                     </div>
+                )}
+
+                {/* Address Selection with Isolated AddressAutocomplete */}
+                <div className="space-y-2">
+                    <label className="text-sm text-gray-400 flex items-center justify-between">
+                        <span>{t.pickup_label}</span>
+                        {hasVerifiedPlace ? (
+                            <span className="text-emerald-400 text-xs flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                {isRTL ? 'כתובת מאומתת' : 'Address verified'}
+                            </span>
+                        ) : (
+                            <span className="text-xs text-gray-500">
+                                {isRTL ? 'יש לבחור מהרשימה' : 'Select from list'}
+                            </span>
+                        )}
+                    </label>
+
+                    <AddressAutocomplete
+                        value={originName}
+                        onChange={text => {
+                            setOriginName(text);
+                            if (!hasStartedInputRef.current) {
+                                hasStartedInputRef.current = true;
+                                sendGAEvent({
+                                    event: 'address_selection_start',
+                                    source_city: cleanCityKey || cityName || 'general',
+                                    page_type: cleanCityKey ? 'city_landing' : 'home',
+                                    page_language: lang
+                                });
+                            }
+                        }}
+                        onPlaceSelected={handlePlaceSelected}
+                        onResetVerification={handleResetVerification}
+                        placeholder={
+                            cityEntry
+                                ? (isRTL ? `הזינו כתובת מדויקת ב${cityEntry.name}...` : `Enter exact address in ${cityEntry.name}...`)
+                                : t.pickup_placeholder
+                        }
+                        isRTL={isRTL}
+                    />
+
                     {errors.origin && <p className="text-red-500 text-xs mt-1">{errors.origin}</p>}
                 </div>
 
@@ -373,12 +418,9 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                                 type="text"
                                 placeholder={t.flight_no_placeholder}
                                 value={flightNumber}
-                                onChange={(e) => {
-                                    setFlightNumber(e.target.value.toUpperCase());
-                                }}
+                                onChange={e => setFlightNumber(e.target.value.toUpperCase())}
                                 className={`w-full bg-dark-bg/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-gold/50 outline-none placeholder:text-gray-600 transition-all uppercase ${isRTL ? 'pl-12' : 'pr-12'}`}
                             />
-                            {/* Static Plane Icon */}
                             <div className={`absolute top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center ${isRTL ? 'left-3' : 'right-3'}`}>
                                 <Plane className={`text-gray-500 w-4 h-4 ${isRTL ? 'rotate-[-45deg]' : 'rotate-[45deg]'}`} />
                             </div>
@@ -390,13 +432,13 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                         <input
                             type="datetime-local"
                             value={flightTime}
-                            onChange={(e) => setFlightTime(e.target.value)}
+                            onChange={e => setFlightTime(e.target.value)}
                             className="w-full bg-dark-bg/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-gold/50 outline-none [color-scheme:dark] text-sm font-sans"
                         />
                     </div>
                 </div>
 
-                {/* Recommended Pickup Time Alert */}
+                {/* Recommended Pickup Time */}
                 <AnimatePresence>
                     {distanceKm > 0 && recommendedPickupTime && (
                         <motion.div
@@ -408,133 +450,78 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                                 <Clock className="w-5 h-5" />
                             </div>
                             <div>
-                                <div className="text-xs text-gray-500">{lang === 'he' ? 'זמן איסוף מומלץ מהבית' : 'Recommended Pickup Time'}</div>
-                                <div className="text-md font-bold text-white">{recommendedPickupTime}</div>
-                                <div className="text-[10px] text-gold/60 mt-0.5">
-                                    {lang === 'he'
-                                        ? `* מחושב לפי 3 שעות לפני המראה + זמן נסיעה משוער (${tripDuration} דק')`
-                                        : `* Based on 3h before takeoff + travel time (${tripDuration} min)`}
-                                </div>
+                                <span className="text-xs text-gray-400 block mb-0.5">
+                                    {isRTL ? 'שעת איסוף מומלצת (3 שעות לפני המראה):' : 'Recommended Pickup (3h before flight):'}
+                                </span>
+                                <span className="font-bold text-white text-lg font-mono tracking-tight text-gold">
+                                    {recommendedPickupTime}
+                                </span>
+                                <span className="text-[10px] text-gray-500 block mt-0.5">
+                                    {isRTL ? `זמן נסיעה משוער: כ-${tripDuration} דקות` : `Est. driving time: ~${tripDuration} min`}
+                                </span>
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                {/* Counter Inputs Row */}
+                {/* Passengers & Luggage Selectors */}
                 <div className="grid grid-cols-2 gap-4">
-                    {/* Passengers */}
-                    <div className="space-y-2">
-                        <label className="text-sm text-gray-400 flex items-center h-6">
-                            <span>{t.passengers}</span>
-                        </label>
-                        <div className="flex items-center bg-dark-bg/50 border border-white/10 rounded-xl p-1 relative h-[52px]">
-                            <button
-                                onClick={() => setPassengers(Math.min(PRICING_CONSTANTS.MAX_PASSENGERS, passengers + 1))}
-                                className="w-10 h-full flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-lg text-white transition-colors"
-                            >
-                                <Plus className="w-4 h-4" />
-                            </button>
-                            <div className="flex-1 text-center font-bold text-lg text-white">
-                                {passengers}
+                    <div className="bg-dark-bg/30 border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <Users className="w-5 h-5 text-gray-400" />
+                            <div>
+                                <span className="text-xs text-gray-400 block">{t.passengers}</span>
+                                <span className="font-bold text-white text-lg">{passengers}</span>
                             </div>
+                        </div>
+                        <div className="flex items-center gap-1">
                             <button
+                                type="button"
                                 onClick={() => setPassengers(Math.max(1, passengers - 1))}
-                                className="w-10 h-full flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-lg text-white transition-colors"
+                                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
                             >
-                                <Minus className="w-4 h-4" />
+                                <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setPassengers(Math.min(PRICING_CONSTANTS.MAX_PASSENGERS, passengers + 1))}
+                                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
                             </button>
                         </div>
                     </div>
 
-                    {/* Luggage */}
-                    <div className="space-y-2">
-                        <label className="text-sm text-gray-400 flex items-center h-6">
-                            <span>{t.luggage}</span>
-                        </label>
-                        <div className="flex items-center bg-dark-bg/50 border border-white/10 rounded-xl p-1 relative h-[52px]">
-                            <button
-                                onClick={() => setLuggage(Math.min(PRICING_CONSTANTS.MAX_LUGGAGE, luggage + 1))}
-                                className="w-10 h-full flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-lg text-white transition-colors"
-                            >
-                                <Plus className="w-4 h-4" />
-                            </button>
-                            <div className="flex-1 text-center font-bold text-lg text-white">
-                                {luggage}
+                    <div className="bg-dark-bg/30 border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <Briefcase className="w-5 h-5 text-gray-400" />
+                            <div>
+                                <span className="text-xs text-gray-400 block">{t.luggage}</span>
+                                <span className="font-bold text-white text-lg">{luggage}</span>
                             </div>
+                        </div>
+                        <div className="flex items-center gap-1">
                             <button
+                                type="button"
                                 onClick={() => setLuggage(Math.max(0, luggage - 1))}
-                                className="w-10 h-full flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-lg text-white transition-colors"
+                                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
                             >
-                                <Minus className="w-4 h-4" />
+                                <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLuggage(Math.min(PRICING_CONSTANTS.MAX_LUGGAGE, luggage + 1))}
+                                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Vehicle Type Info Badge - Elegant & Dynamic */}
-                <AnimatePresence>
-                    {(passengers > 4 || luggage > 3) && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0, y: -10 }}
-                            animate={{ opacity: 1, height: 'auto', y: 0 }}
-                            exit={{ opacity: 0, height: 0, y: -10 }}
-                            className="bg-gold/5 border border-gold/20 rounded-2xl p-3 flex items-center justify-between group/vehicle"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="bg-gold/10 p-2 rounded-xl text-gold group-hover/vehicle:scale-110 transition-transform">
-                                    <Car className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <div className="text-xs text-gold/60 leading-none mb-1">{isRTL ? 'סוג רכב נדרש' : 'Required Vehicle'}</div>
-                                    <div className="text-sm font-bold text-white leading-none">{breakdown?.vehicleName}</div>
-                                </div>
-                            </div>
-                            <div className="text-[10px] bg-gold/10 text-gold px-2 py-1 rounded-full border border-gold/20 font-bold">
-                                Factor x{breakdown?.vehicleMultiplier}
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* Personal Info Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                    <div className="space-y-1">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder={t.full_name}
-                                value={name}
-                                onChange={(e) => {
-                                    setName(e.target.value);
-                                    setErrors({ ...errors, name: undefined });
-                                }}
-                                className={`w-full bg-dark-bg/50 border ${errors.name ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:border-gold/50 outline-none placeholder:text-gray-600 ${isRTL ? 'pl-10' : 'pr-10'}`}
-                            />
-                            <User className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 ${isRTL ? 'left-3' : 'right-3'}`} />
-                        </div>
-                        {errors.name && <p className="text-red-500 text-xs">{errors.name}</p>}
-                    </div>
-                    <div className="space-y-1">
-                        <div className="relative">
-                            <input
-                                type="tel"
-                                placeholder={t.phone}
-                                value={phone}
-                                onChange={(e) => {
-                                    setPhone(e.target.value);
-                                    setErrors({ ...errors, phone: undefined });
-                                }}
-                                className={`w-full bg-dark-bg/50 border ${errors.phone ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:border-gold/50 outline-none placeholder:text-gray-600 ${isRTL ? 'pl-10' : 'pr-10'}`}
-                            />
-                            <Phone className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 ${isRTL ? 'left-3' : 'right-3'}`} />
-                        </div>
-                        {errors.phone && <p className="text-red-500 text-xs">{errors.phone}</p>}
-                    </div>
-                </div>
-
-                {/* Toggles */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {distanceKm > 0 && (
+                {/* Toggles (Route 6 & Baby Seat) */}
+                <div className="space-y-3">
+                    {distanceKm > 20 && (
                         <div
                             onClick={() => setUseRoute6(!useRoute6)}
                             className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${useRoute6 ? 'bg-gold/10 border-gold/40' : 'bg-dark-bg/30 border-white/5 hover:border-white/20'}`}
@@ -545,7 +532,9 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                                 </div>
                                 <span className={`text-sm ${useRoute6 ? 'text-gold' : 'text-gray-400'}`}>{t.route6}</span>
                             </div>
-                            <Car className={`w-4 h-4 ${useRoute6 ? 'text-gold' : 'text-gray-600'}`} />
+                            <span className="text-xs font-mono text-gray-500">
+                                +{useRoute6 ? (distanceKm < 35 ? '20' : distanceKm < 80 ? '40' : '50') : '0'}₪
+                            </span>
                         </div>
                     )}
 
@@ -555,7 +544,7 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                     >
                         <div className="flex items-center gap-3">
                             <div className={`w-5 h-5 rounded flex items-center justify-center border ${babySeat ? 'bg-gold border-gold text-black' : 'border-gray-500'}`}>
-                                {babySeat && <CheckCircle2 className="w-3.5 h-3.5" />}
+                                <CheckCircle2 className="w-3.5 h-3.5" />
                             </div>
                             <span className={`text-sm ${babySeat ? 'text-gold' : 'text-gray-400'}`}>{t.baby_seat}</span>
                         </div>
@@ -565,12 +554,19 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
 
                 <div className="h-px bg-white/10 w-full" />
 
-                {/* Pricing Logic Breakdown */}
+                {/* Price Breakdown */}
                 <div className="space-y-1">
                     <div className="flex justify-between text-xs text-gray-400 font-medium">
                         <span>{t.base_price}</span>
-                        <span>₪{Math.round(breakdown?.distance + breakdown?.start)}</span>
+                        <span>
+                            {isPriceReady
+                                ? `₪${Math.round(breakdown.distance + breakdown.start)}`
+                                : cityEntry
+                                ? `החל מ-₪${cityEntry.price}`
+                                : '—'}
+                        </span>
                     </div>
+
                     <div className="flex justify-between text-xs text-gray-500">
                         <span className="flex items-center gap-1">
                             {t.airport_fee}
@@ -578,36 +574,35 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                         </span>
                         <span>₪{PRICING_CONSTANTS.AIRPORT_FEE}</span>
                     </div>
+
                     {breakdown?.vehicleMultiplier > 1 && (
                         <div className="flex justify-between text-xs text-gold/80">
                             <span>{breakdown?.vehicleName} (Factor x{breakdown?.vehicleMultiplier})</span>
                             <span className="flex items-center gap-1"><Info className="w-3 h-3" /></span>
                         </div>
                     )}
-                    {breakdown?.tariff?.includes('→') && (
-                        <div className="flex justify-between text-xs text-gold/80 italic">
-                            <span>{lang === 'he' ? 'חילוף תעריפים במהלך נסיעה' : 'Tariff change during trip'}</span>
-                            <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" /></span>
-                        </div>
-                    )}
-                    {(breakdown?.tariff === 'B' || breakdown?.tariff?.startsWith('B→') || breakdown?.tariff?.endsWith('→B')) && (
+
+                    {(breakdown?.tariff === 'B' || breakdown?.tariff?.includes('B')) && (
                         <div className="flex justify-between text-xs text-gold/80">
                             <span>{t.night_tariff}</span>
                             <span className="flex items-center gap-1"><Info className="w-3 h-3" /></span>
                         </div>
                     )}
-                    {(breakdown?.tariff === 'C' || breakdown?.tariff?.startsWith('C→') || breakdown?.tariff?.endsWith('→C')) && (
+
+                    {(breakdown?.tariff === 'C' || breakdown?.tariff?.includes('C')) && (
                         <div className="flex justify-between text-xs text-gold/80">
                             <span>{t.shabbat_tariff}</span>
                             <span className="flex items-center gap-1"><Info className="w-3 h-3" /></span>
                         </div>
                     )}
+
                     {useRoute6 && (
                         <div className="flex justify-between text-xs text-gold/80">
                             <span>{t.route6_fee}</span>
-                            <span>₪{breakdown?.route6}</span>
+                            <span>₪{breakdown?.route6 || 0}</span>
                         </div>
                     )}
+
                     {babySeat && (
                         <div className="flex justify-between text-xs text-gold/80">
                             <span>{t.baby_seat_fee}</span>
@@ -616,52 +611,129 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                     )}
                 </div>
 
-                {/* Total Price */}
+                {/* Total Price Display */}
                 <div className="flex items-end justify-between bg-dark-bg/50 p-4 rounded-2xl border border-white/5">
                     <div>
-                        <span className="text-gray-400 text-sm block mb-1">{t.total}</span>
+                        <span className="text-gray-400 text-sm block mb-1">
+                            {hasVerifiedPlace
+                                ? t.total
+                                : isRTL
+                                ? 'הערכת מחיר התחלתית'
+                                : 'Initial Price Estimate'}
+                        </span>
                         <div className="flex items-center gap-2">
                             <span className="text-xs px-2 py-0.5 rounded bg-white/10 text-gray-300">{t.vat_included}</span>
                         </div>
                     </div>
+
                     <div className="text-right">
-                        <AnimatePresence mode="wait">
-                            <motion.span
-                                key={price}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="text-4xl font-bold text-white block font-mono tracking-tight"
-                            >
-                                ₪{price}
-                            </motion.span>
-                        </AnimatePresence>
+                        {isPriceReady ? (
+                            <AnimatePresence mode="wait">
+                                <motion.span
+                                    key={price}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="text-4xl font-bold text-white block font-mono tracking-tight"
+                                >
+                                    ₪{price}
+                                </motion.span>
+                            </AnimatePresence>
+                        ) : cityEntry ? (
+                            <div>
+                                <span className="text-xs text-gold/80 block">{isRTL ? 'החל מ-' : 'From '}</span>
+                                <span className="text-3xl font-bold text-white block font-mono tracking-tight">
+                                    ₪{cityEntry.price}
+                                </span>
+                            </div>
+                        ) : (
+                            <div>
+                                <span className="text-2xl font-bold text-gray-500 block font-mono tracking-tight">—</span>
+                                <span className="text-[11px] text-gold/80 block mt-0.5">
+                                    {isRTL ? 'בחרו כתובת' : 'Select address'}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 {/* Disclaimer */}
-                <p className="text-[10px] text-gray-500 italic px-2">
+                <p className="text-[10px] text-gray-400 italic px-2">
                     {t.disclaimer}
                 </p>
 
-                {/* CTA */}
-                <button
-                    onClick={handleBooking}
-                    disabled={isSubmitting}
-                    className="w-full bg-gold hover:bg-gold-hover text-dark-bg font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] active:scale-[0.98] group/btn disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                    {isSubmitting ? (
-                        <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            {t.submitting}
-                        </>
-                    ) : (
-                        <>
-                            {t.submit_btn}
-                            <svg viewBox="0 0 24 24" className={`w-5 h-5 fill-current transition-transform ${isRTL ? 'group-hover/btn:translate-x-1' : 'group-hover/btn:-translate-x-1 rotate-180'}`} xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
-                        </>
-                    )}
-                </button>
+                {/* User Details (Name & Phone) */}
+                <div className="space-y-4 pt-2 border-t border-white/5">
+                    <div className="space-y-1">
+                        <label className="text-xs text-gray-400">{t.full_name}</label>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={e => {
+                                    setName(e.target.value);
+                                    setErrors(prev => ({ ...prev, name: undefined }));
+                                }}
+                                placeholder={isRTL ? "ישראל ישראלי" : "John Doe"}
+                                className={`w-full bg-dark-bg/50 border ${errors.name ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-2.5 text-white text-sm focus:border-gold/50 outline-none ${isRTL ? 'pl-9' : 'pr-9'}`}
+                            />
+                            <User className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 ${isRTL ? 'left-3' : 'right-3'}`} />
+                        </div>
+                        {errors.name && <p className="text-red-500 text-xs mt-0.5">{errors.name}</p>}
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs text-gray-400">{t.phone}</label>
+                        <div className="relative">
+                            <input
+                                type="tel"
+                                value={phone}
+                                onChange={e => {
+                                    setPhone(e.target.value);
+                                    setErrors(prev => ({ ...prev, phone: undefined }));
+                                }}
+                                placeholder="050-0000000"
+                                className={`w-full bg-dark-bg/50 border ${errors.phone ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-2.5 text-white text-sm focus:border-gold/50 outline-none font-mono ${isRTL ? 'pl-9' : 'pr-9'}`}
+                            />
+                            <Phone className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 ${isRTL ? 'left-3' : 'right-3'}`} />
+                        </div>
+                        {errors.phone && <p className="text-red-500 text-xs mt-0.5">{errors.phone}</p>}
+                    </div>
+                </div>
+
+                {/* Booking Button: Guidance State if Unverified, Booking State when Exact Route */}
+                {!hasVerifiedPlace ? (
+                    <div className="space-y-2">
+                        <button
+                            type="button"
+                            onClick={handleBooking}
+                            className="w-full bg-white/10 hover:bg-white/15 text-gray-300 py-4 rounded-xl font-bold text-base transition-all border border-white/10 flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                            <MapPin className="w-4 h-4 text-gold" />
+                            <span>
+                                {isRTL
+                                    ? `נא לבחור כתובת איסוף ב${cityName || 'עיר'} לקבלת מחיר סופי`
+                                    : `Select exact pickup address in ${cityName || 'city'} for final price`}
+                            </span>
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        type="button"
+                        onClick={handleBooking}
+                        disabled={isSubmitting}
+                        className="w-full bg-gold hover:bg-gold-hover text-dark-bg py-4 rounded-xl font-bold text-lg transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                <span>{t.submitting}</span>
+                            </>
+                        ) : (
+                            <span>{t.submit_btn}</span>
+                        )}
+                    </button>
+                )}
             </div>
         </div>
     );

@@ -9,18 +9,28 @@ export const metadata: Metadata = {
     description: 'Book a VIP taxi to Ben Gurion Airport with GoldaCabs. Online fare calculator, luxury vehicles, fixed prices, and English-speaking drivers.',
     keywords: ['taxi to ben gurion', 'tlv taxi', 'airport transfer israel', 'golda cabs', 'tel aviv taxi', 'taxi booking israel'],
     openGraph: {
-        title: 'GoldaCabs - Premium Airport Transfers in Israel',
-        description: 'Book your ride to Ben Gurion Airport in seconds. Reliable, professional, and fair prices.',
-        locale: 'en_IL',
+        title: 'GoldaCabs VIP Ben Gurion Airport | 24/7 Premium Transfers',
+        description: 'Instant online fare calculator and direct WhatsApp booking. Executive fleet, private chauffeur, door-to-door pickup and transparent fixed pricing.',
+        url: 'https://www.goldacabs.co.il/en',
+        siteName: 'GoldaCabs VIP',
+        locale: 'en_US',
         type: 'website',
         images: [
             {
-                url: '/og-image.png',
+                url: 'https://www.goldacabs.co.il/og-image.png',
+                secureUrl: 'https://www.goldacabs.co.il/og-image.png',
                 width: 1200,
                 height: 630,
-                alt: 'GoldaCabs | Premium Airport Taxi VIP',
+                type: 'image/png',
+                alt: 'GoldaCabs VIP | Premium Airport Taxi to Ben Gurion (TLV)',
             }
         ]
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'GoldaCabs VIP Ben Gurion Airport | 24/7 Premium Transfers',
+        description: 'Instant online fare calculator and direct WhatsApp booking. Executive fleet, private chauffeur, and transparent fixed pricing.',
+        images: ['https://www.goldacabs.co.il/og-image.png'],
     },
     alternates: {
         canonical: 'https://www.goldacabs.co.il/en',
@@ -34,53 +44,11 @@ export const metadata: Metadata = {
 
 import { Plane, MapPin, CheckCircle2, ListChecks, ArrowLeftRight, CreditCard, ShieldCheck } from 'lucide-react';
 
-export default function HomeEn() {
-    const jsonLd = {
-        '@context': 'https://schema.org',
-        '@type': 'TaxiService',
-        'name': 'GoldaCabs',
-        'url': 'https://www.goldacabs.co.il/en',
-        'image': 'https://www.goldacabs.co.il/og-image.png',
-        'description': 'Premium taxi service to Ben Gurion Airport and across Israel. Luxury cars, English speaking drivers.',
-        'telephone': '+972-54-743-8110',
-        'areaServed': [
-            { '@type': 'City', 'name': 'Tel Aviv-Yafo' },
-            { '@type': 'City', 'name': 'Raanana' },
-            { '@type': 'City', 'name': 'Herzliya' },
-            { '@type': 'City', 'name': 'Jerusalem' }
-        ],
-        'priceRange': '₪₪',
-        'openingHoursSpecification': {
-            '@type': 'OpeningHoursSpecification',
-            'dayOfWeek': [
-                'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
-            ],
-            'opens': '00:00',
-            'closes': '23:59'
-        },
-        'availableLanguage': ['English', 'Hebrew'],
-        'serviceType': 'Airport Shuttle',
-        'aggregateRating': {
-            '@type': 'AggregateRating',
-            'ratingValue': '4.9',
-            'ratingCount': '124',
-            'bestRating': '5',
-            'worstRating': '1'
-        }
-    };
+import { getBusinessSchema, getFAQSchema } from '@/lib/schema';
 
-    const faqJsonLd = {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        'mainEntity': dictionary.en.faq.questions.map(item => ({
-            '@type': 'Question',
-            'name': item.q,
-            'acceptedAnswer': {
-                '@type': 'Answer',
-                'text': item.a
-            }
-        }))
-    };
+export default function HomeEn() {
+    const jsonLd = getBusinessSchema();
+    const faqJsonLd = getFAQSchema(dictionary.en.faq.questions);
 
     return (
         <main className="min-h-screen bg-dark-bg text-white">

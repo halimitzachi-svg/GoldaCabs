@@ -9,18 +9,28 @@ export const metadata: Metadata = {
   description: 'הזמנת מונית לנתב"ג בקליק עם מוניות גולדה. מחשבון מחיר אונליין, רכבים חדישים, זמינות 24/7 ומחירים הוגנים. שירות בכל אזור המרכז והשרון.',
   keywords: ['מונית לנתב"ג', 'הזמנת מונית', 'מוניות גולדה', 'מונית לשדה התעופה', 'מונית ספיישל'],
   openGraph: {
-    title: 'מוניות גולדה - הדרך הכי נוחה לנתב"ג',
-    description: 'מחשבון מחיר והזמנה מיידית בוואטסאפ. שירות VIP דייקן ואמין.',
+    title: 'מוניות גולדה VIP לנתב"ג | שירות הסעות פרימיום 24/7',
+    description: 'מחשבון מחיר אונליין והזמנה ישירה בוואטסאפ. נהג אישי, רכבים חדישים, איסוף מדלת הבית ומחיר שקוף ללא הפתעות.',
+    url: 'https://www.goldacabs.co.il',
+    siteName: 'מוניות גולדה',
     locale: 'he_IL',
     type: 'website',
     images: [
       {
-        url: '/og-image.png',
+        url: 'https://www.goldacabs.co.il/og-image.png',
+        secureUrl: 'https://www.goldacabs.co.il/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'מוניות גולדה | מוניות לנתב"ג VIP',
+        type: 'image/png',
+        alt: 'מוניות גולדה VIP | שירות הסעות פרימיום לנתב"ג',
       }
     ]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'מוניות גולדה VIP לנתב"ג | שירות הסעות פרימיום 24/7',
+    description: 'מחשבון מחיר אונליין והזמנה ישירה בוואטסאפ. נהג אישי, רכבים חדישים ומחיר שקוף ללא הפתעות.',
+    images: ['https://www.goldacabs.co.il/og-image.png'],
   },
   alternates: {
     canonical: 'https://www.goldacabs.co.il',
@@ -34,57 +44,11 @@ export const metadata: Metadata = {
 
 import { Plane, MapPin, CheckCircle2, ListChecks, ArrowLeftRight, CreditCard, ShieldCheck } from 'lucide-react';
 
-export default function Home() {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'TaxiService',
-    'name': 'מוניות גולדה',
-    'image': 'https://www.goldacabs.co.il/og-image.png',
-    'description': 'שירות מוניות ספיישל לנתב"ג ולכל חלקי הארץ. רכבים מפוארים, נהגים אדיבים ומחירים הוגנים.',
-    'telephone': '+972-54-743-8110',
-    'url': 'https://www.goldacabs.co.il',
-    'priceRange': '₪₪',
-    'areaServed': [
-      { '@type': 'City', 'name': 'Tel Aviv-Yafo' },
-      { '@type': 'City', 'name': 'Raanana' },
-      { '@type': 'City', 'name': 'Herzliya' },
-      { '@type': 'City', 'name': 'Kfar Saba' },
-      { '@type': 'City', 'name': 'Netanya' },
-      { '@type': 'City', 'name': 'Petah Tikva' }
-    ],
-    'openingHoursSpecification': {
-      '@type': 'OpeningHoursSpecification',
-      'dayOfWeek': [
-        'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
-      ],
-      'opens': '00:00',
-      'closes': '23:59'
-    },
-    'availableLanguage': ['Hebrew', 'English'],
-    'serviceType': 'Airport Shuttle',
-    'paymentAccepted': 'Cash, Bit, Paybox',
-    'currenciesAccepted': 'ILS',
-    'aggregateRating': {
-      '@type': 'AggregateRating',
-      'ratingValue': '5.0',
-      'ratingCount': '5',
-      'bestRating': '5',
-      'worstRating': '1'
-    }
-  };
+import { getBusinessSchema, getFAQSchema } from '@/lib/schema';
 
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    'mainEntity': dictionary.he.faq.questions.map(item => ({
-      '@type': 'Question',
-      'name': item.q,
-      'acceptedAnswer': {
-        '@type': 'Answer',
-        'text': item.a
-      }
-    }))
-  };
+export default function Home() {
+  const jsonLd = getBusinessSchema();
+  const faqJsonLd = getFAQSchema(dictionary.he.faq.questions);
 
   return (
     <main className="min-h-screen bg-dark-bg text-white">

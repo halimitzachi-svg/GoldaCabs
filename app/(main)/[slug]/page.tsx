@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Hero from '@/components/Hero';
-import { Clock, CheckCircle2, Shield, MapPin, Compass } from 'lucide-react';
+import { Clock, CheckCircle2, Shield, MapPin, Compass, Navigation } from 'lucide-react';
 import Link from 'next/link';
 import { dictionary } from '@/lib/dictionary';
 import { CITIES } from '@/lib/cities';
@@ -16,7 +16,7 @@ function getCityData(slug: string) {
     if (!slug || typeof slug !== 'string' || !slug.startsWith('taxi-')) return null;
     const cityKey = slug.replace('taxi-', '').toLowerCase();
     const cityEntry = CITIES[cityKey];
-    return cityEntry?.en;
+    return cityEntry?.he;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -27,8 +27,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         return {};
     }
 
-    const title = `Taxi from ${cityData.name} to Ben Gurion Airport | GoldaCabs`;
-    const description = `Book a VIP taxi from ${cityData.name} to Ben Gurion Airport (TLV). Transparent price estimate from ${cityData.price}ILS, English-speaking drivers, and 24/7 availability.`;
+    const title = `מוניות ${cityData.name} לנתב"ג | מוניות גולדה VIP`;
+    const description = `הזמנת מונית מ${cityData.name} לנתב"ג. מחיר שקוף החל מ-${cityData.price}₪, איסוף מדלת הבית ב${cityData.name}, רכבים חדישים ומרווחים, זמינות 24/7.`;
 
     return {
         title,
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         openGraph: {
             title,
             description,
-            locale: 'en_US',
+            locale: 'he_IL',
             type: 'website',
             images: [
                 {
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
                     width: 1200,
                     height: 630,
                     type: 'image/png',
-                    alt: `Taxi from ${cityData.name} to Ben Gurion Airport | GoldaCabs VIP`,
+                    alt: `מוניות ${cityData.name} לנתב"ג | מוניות גולדה VIP`,
                 }
             ]
         },
@@ -55,9 +55,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             description,
             images: ['https://www.goldacabs.co.il/og-image.png'],
         },
-        keywords: [`taxi from ${cityData.name} to tlv`, `taxi ${cityData.name}`, 'airport transfer israel', 'golda cabs'],
+        keywords: [`מונית מ${cityData.name} לנתב"ג`, `מוניות ${cityData.name}`, 'הסעה לנתב"ג', 'מונית גדולה לשדה התעופה', cityData.name],
         alternates: {
-            canonical: `https://www.goldacabs.co.il/en/${slug}`,
+            canonical: `https://www.goldacabs.co.il/${slug}`,
             languages: {
                 'he-IL': `https://www.goldacabs.co.il/${slug}`,
                 'en-IL': `https://www.goldacabs.co.il/en/${slug}`,
@@ -72,7 +72,7 @@ export async function generateStaticParams() {
     }));
 }
 
-export default async function CityPageEn({ params }: Props) {
+export default async function CityPage({ params }: Props) {
     const { slug } = await params;
     const cityData = getCityData(slug);
 
@@ -85,25 +85,25 @@ export default async function CityPageEn({ params }: Props) {
 
     const faqs = [
         {
-            q: `How much is a taxi from ${cityData.name} to Ben Gurion Airport?`,
-            a: `Estimated base fare from ${cityData.name} starts at ${cityData.price}ILS from city center. The final price depends on exact pickup address, time of day (day/night/weekend tariffs), and luggage.`
+            q: `כמה עולה מונית מ${cityData.name} לנתב"ג?`,
+            a: `המחיר לנסיעה מ${cityData.name} לנתב"ג מתחיל ב-${cityData.price}₪ כהערכת בסיס ממרכז העיר. המחיר הסופי נקבע בהתאם לכתובת האיסוף המדויקת, שעת הנסיעה (תעריף יום/לילה/שבת), וכמות הנוסעים והכבודה.`
         },
         {
-            q: `How far in advance should I book my ride from ${cityData.name}?`,
-            a: `We recommend booking 12–24 hours in advance to guarantee driver assignment. Urgent and last-minute requests are also accommodated based on immediate availability.`
+            q: `כמה זמן מראש צריך להזמין מונית מ${cityData.name}?`,
+            a: `אנו ממליצים להזמין מונית כ-12–24 שעות מראש כדי לשריין נהג ורכב מותאם. במוניות גולדה אנו ערוכים גם לקריאות דחופות מ${cityData.name} על בסיס זמינות מיידית.`
         },
         {
-            q: `How can I pay for the transfer?`,
-            a: `Payment is accepted via Cash, or popular Israeli mobile payment apps (Bit and Paybox) directly with your driver.`
+            q: `כיצד ניתן לשלם עבור הנסיעה?`,
+            a: `אנו מקבלים תשלום במגוון אמצעים: במזומן, באפליקציית Bit ו-Paybox ישירות מול הנהג.`
         },
         {
-            q: `Do you offer large vehicles for families with multiple suitcases?`,
-            a: `Yes. Our fleet includes spacious minivans and minibuses accommodating 6 to 10+ passengers with extensive luggage capacity.`
+            q: `האם ניתן להזמין מונית גדולה מ${cityData.name} למשפחה עם מזוודות?`,
+            a: `בהחלט. הצי שלנו כולל מוניות ספיישל, רכבי ואן (עד 7 נוסעים) ומיניבוסים (עד 11–20 נוסעים) המותאמים למשפחות עם כבודה מרובה.`
         }
     ];
 
-    // Clean JSON-LD: zero aggregateRating, zero review, zero offers
-    const jsonLd = getCityServiceSchema(cityData, 'en');
+    // Clean JSON-LD: zero aggregateRating, zero review, zero offers (prices are estimates in visible UI only)
+    const jsonLd = getCityServiceSchema(cityData, 'he');
     const faqJsonLd = getFAQSchema(faqs);
 
     return (
@@ -119,10 +119,10 @@ export default async function CityPageEn({ params }: Props) {
 
             {/* Above the Fold Hero with Primary H1 */}
             <Hero
-                lang="en"
+                lang="he"
                 isSubPage={true}
-                customTitle={`Taxi from ${cityData.name} to Ben Gurion`}
-                customSubtitle={`VIP door-to-door transfer from ${cityData.name} to TLV Airport • From ${cityData.price}ILS • Available 24/7`}
+                customTitle={`מוניות ${cityData.name} לנתב"ג`}
+                customSubtitle={`הסעות VIP מדלת הבית ב${cityData.name} ישירות לטרמינל • החל מ-${cityData.price}₪ • זמינות 24/7`}
                 citySlug={cleanCityKey}
             />
 
@@ -130,56 +130,56 @@ export default async function CityPageEn({ params }: Props) {
                 <div className="absolute top-0 right-0 w-1/3 h-full bg-gold/5 blur-[120px] -z-10" />
 
                 <div className="container mx-auto px-4">
-                    <div className="max-w-4xl mx-auto space-y-12 text-left">
+                    <div className="max-w-4xl mx-auto space-y-12">
 
-                        {/* Quick Stats */}
+                        {/* Quick Stats Grid */}
                         <div className="grid md:grid-cols-3 gap-6">
                             <div className="bg-white/5 border border-white/10 p-6 rounded-2xl flex flex-col items-center text-center">
                                 <div className="bg-gold/20 p-4 rounded-full mb-4 text-gold">
                                     <Clock className="w-8 h-8" />
                                 </div>
-                                <h3 className="font-bold text-xl mb-2">Est. Travel Time</h3>
-                                <p className="text-gray-400">~{cityData.duration} from central {cityData.name}</p>
+                                <h3 className="font-bold text-xl mb-2">זמן נסיעה משוער</h3>
+                                <p className="text-gray-400">כ-{cityData.duration} ממרכז {cityData.name}</p>
                             </div>
                             <div className="bg-white/5 border border-white/10 p-6 rounded-2xl flex flex-col items-center text-center">
                                 <div className="bg-gold/20 p-4 rounded-full mb-4 text-gold">
                                     <MapPin className="w-8 h-8" />
                                 </div>
-                                <h3 className="font-bold text-xl mb-2">Distance to TLV</h3>
-                                <p className="text-gray-400">~{cityData.distance} km</p>
+                                <h3 className="font-bold text-xl mb-2">מרחק מנתב"ג</h3>
+                                <p className="text-gray-400">כ-{cityData.distance} ק"מ</p>
                             </div>
                             <div className="bg-white/5 border border-white/10 p-6 rounded-2xl flex flex-col items-center text-center">
                                 <div className="bg-gold/20 p-4 rounded-full mb-4 text-gold">
                                     <Shield className="w-8 h-8" />
                                 </div>
-                                <h3 className="font-bold text-xl mb-2">Transparent Fare</h3>
-                                <p className="text-gray-400">From {cityData.price}ILS (city center baseline)</p>
+                                <h3 className="font-bold text-xl mb-2">הערכת מחיר שקופה</h3>
+                                <p className="text-gray-400">החל מ-{cityData.price}₪ ממרכז העיר</p>
                             </div>
                         </div>
 
-                        {/* Verified Local GEO Information Box (if available) */}
+                        {/* Verified Local GEO Information Box (if available for top cities) */}
                         {localContent && (
                             <div className="bg-gradient-to-br from-gold/10 via-white/5 to-transparent p-8 rounded-3xl border border-gold/20 space-y-6">
                                 <div className="flex items-center gap-3">
                                     <Compass className="w-6 h-6 text-gold" />
                                     <h2 className="text-2xl font-bold text-white">
-                                        Local Route & Transfer Info: {cityData.name} to TLV
+                                        מידע מקומי לנוסעים מ{cityData.name} לנתב"ג
                                     </h2>
                                 </div>
 
                                 <div className="grid sm:grid-cols-2 gap-6 pt-2">
                                     <div className="space-y-2">
                                         <span className="text-xs text-gold uppercase tracking-wider font-semibold block">
-                                            Key Pickup Districts
+                                            שכונות ונקודות איסוף מרכזיות
                                         </span>
                                         <p className="text-sm text-gray-300 leading-relaxed">
-                                            Door-to-door service across {cityData.name}: {localContent.neighborhoods.join(' • ')}.
+                                            איסוף מכל רחבי {cityData.name}: {localContent.neighborhoods.join(' • ')}.
                                         </p>
                                     </div>
 
                                     <div className="space-y-2">
                                         <span className="text-xs text-gold uppercase tracking-wider font-semibold block">
-                                            Primary Transit Routes
+                                            נתיבי נסיעה עיקריים
                                         </span>
                                         <p className="text-sm text-gray-300 leading-relaxed">
                                             {localContent.mainRoutes.join(', ')}.
@@ -188,103 +188,105 @@ export default async function CityPageEn({ params }: Props) {
 
                                     <div className="space-y-2">
                                         <span className="text-xs text-gold uppercase tracking-wider font-semibold block">
-                                            Peak vs Off-Peak Transit
+                                            זמני נסיעה בשעות עומס מול לילה
                                         </span>
                                         <p className="text-sm text-gray-300 leading-relaxed">
-                                            Rush hours: ~{localContent.peakDuration} | Off-peak / night: ~{localContent.offPeakDuration}.
+                                            שעות שיא: כ-{localContent.peakDuration} | שעות שפל/לילה: כ-{localContent.offPeakDuration}.
                                         </p>
                                     </div>
 
                                     <div className="space-y-2">
                                         <span className="text-xs text-gold uppercase tracking-wider font-semibold block">
-                                            Airport Arrival Pickups
+                                            איסוף מנחיתות בנתב"ג
                                         </span>
                                         <p className="text-sm text-gray-300 leading-relaxed">
-                                            {localContent.arrivalNotesEn}
+                                            {localContent.arrivalNotesHe}
                                         </p>
                                     </div>
                                 </div>
 
                                 <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-500">
-                                    <span>Last reviewed: {localContent.lastReviewed}</span>
-                                    <span>Sources: GoldaCabs Dispatch Archive</span>
+                                    <span>עודכן לאחרונה: {localContent.lastReviewed.split('-').reverse().join('/')}</span>
+                                    <span>מקור: תיעוד תנועה ומערך השיגור של מוניות גולדה</span>
                                 </div>
                             </div>
                         )}
 
-                        {/* General Content */}
-                        <div className="prose prose-invert max-w-none text-left bg-white/5 p-8 rounded-3xl border border-white/10">
-                            <h2 className="text-2xl font-bold text-gold mb-4">Why Book with GoldaCabs from {cityData.name}?</h2>
+                        {/* General City Page Content */}
+                        <div className="prose prose-invert max-w-none text-right bg-white/5 p-8 rounded-3xl border border-white/10">
+                            <h2 className="text-2xl font-bold text-gold mb-4">למה להזמין מונית מ{cityData.name} עם מוניות גולדה?</h2>
                             <p className="text-gray-300 text-lg leading-relaxed mb-6">
-                                Experience hassle-free airport transit directly from your doorstep in {cityData.name} to Terminal 3 or Terminal 1.
-                                Our professional, English-speaking drivers ensure punctual, comfortable, and stress-free rides around the clock.
+                                תושבי {cityData.name} כבר יודעים - הדרך הכי נוחה ובטוחה להתחיל את הנסיעה לחו"ל היא עם מוניות גולדה.
+                                אנחנו מציעים שירות הסעות פרימיום מדלת הבית ב{cityData.name} ישירות לטרמינל 3 או טרמינל 1.
+                                <br /><br />
+                                הנהגים שלנו מכירים היטב את כבישי האזור ואת צירי התנועה המהירים ביותר, כדי להבטיח שתגיעו לטיסה בזמן, ברוגע ובנוחות מקסימלית.
                             </p>
 
                             <div className="grid md:grid-cols-2 gap-8 my-8">
                                 <div>
                                     <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
                                         <CheckCircle2 className="text-gold w-5 h-5" />
-                                        Safety & Premium Fleet
+                                        ביטחון ובטיחות מעל הכל
                                     </h3>
                                     <p className="text-gray-400 text-sm">
-                                        Late-model, spotlessly clean, and climate-controlled vehicles.
+                                        כל הרכבים בצי שלנו חדישים, נקיים ומתוחזקים ברמה הגבוהה ביותר.
                                     </p>
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
                                         <CheckCircle2 className="text-gold w-5 h-5" />
-                                        24/7 Dispatch
+                                        זמינות 24/7 ב{cityData.name}
                                     </h3>
                                     <p className="text-gray-400 text-sm">
-                                        Full availability for early morning departures, red-eye flights, and weekend transfers.
+                                        זמינים מסביב לשעון לטיסות בוקר מוקדמות, טיסות לילה ונחיתות בסופי שבוע וחגים.
                                     </p>
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
                                         <CheckCircle2 className="text-gold w-5 h-5" />
-                                        Spacious Family Vans
+                                        רכבים מרווחים לכל המשפחה
                                     </h3>
                                     <p className="text-gray-400 text-sm">
-                                        Minivans and large taxis configured for 6 to 10 passengers with multiple suitcases.
+                                        צי רכבים מגוון כולל רכבי ואן ומיניבוס המתאימים ל-6 עד 10 נוסעים עם הרבה כבודה.
                                     </p>
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
                                         <CheckCircle2 className="text-gold w-5 h-5" />
-                                        Guaranteed Punctuality
+                                        דייקנות ללא פשרות
                                     </h3>
                                     <p className="text-gray-400 text-sm">
-                                        Drivers arrive 5–10 minutes early and assist with your luggage.
+                                        הנהגים שלנו מגיעים כ-5 דקות לפני הזמן שנקבע ומסייעים בהעמסת המזוודות.
                                     </p>
                                 </div>
                             </div>
 
                             {/* Transparent Price Guarantee Box */}
                             <div className="bg-gold/10 p-6 rounded-2xl border border-gold/20 my-6">
-                                <h3 className="text-xl font-bold text-gold mb-3 text-center">Transparent Fare Estimate: {cityData.name} - TLV</h3>
+                                <h3 className="text-xl font-bold text-gold mb-3 text-center">הערכת מחיר שקופה: {cityData.name} - נתב"ג</h3>
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between border-b border-gold/10 pb-2">
-                                        <span>Standard Sedan (Up to 4 passengers)</span>
-                                        <span className="font-bold">From {cityData.price}ILS (City center baseline)</span>
+                                        <span>מונית ספיישל (עד 4 נוסעים)</span>
+                                        <span className="font-bold">החל מ-{cityData.price}₪ (הערכת מרכז עיר)</span>
                                     </div>
                                     <div className="flex justify-between border-b border-gold/10 pb-2">
-                                        <span>Luggage & Suitcases</span>
-                                        <span className="font-bold">No hidden per-bag fee*</span>
+                                        <span>כבודה ומזוודות</span>
+                                        <span className="font-bold">ללא חיוב נפרד למזוודה*</span>
                                     </div>
                                     <div className="flex justify-between border-b border-gold/10 pb-2">
-                                        <span>Night / Weekend Service</span>
-                                        <span className="font-bold">Standard Tariff B / C applied</span>
+                                        <span>נסיעת לילה / שבת וחג</span>
+                                        <span className="font-bold">תעריף ב' / ג' כלול בחישוב</span>
                                     </div>
                                 </div>
                                 <p className="text-xs text-gray-400 mt-3 text-center">
-                                    *No separate fee per suitcase. Vehicle size is matched to your group and luggage count. Final fare confirmed before departure.
+                                    *אין חיוב נפרד לכל מזוודה. סוג הרכב והמחיר מותאמים למספר הנוסעים ולכמות הכבודה. המחיר הסופי מתואם מראש לפני הנסיעה.
                                 </p>
                             </div>
                         </div>
 
-                        {/* FAQs */}
+                        {/* FAQ Section */}
                         <div className="space-y-4">
-                            <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions: {cityData.name} to TLV</h2>
+                            <h2 className="text-3xl font-bold text-center mb-8">שאלות נפוצות על מוניות מ{cityData.name} לנתב"ג</h2>
 
                             {faqs.map((faq, idx) => (
                                 <details key={idx} className="group bg-surface border border-white/5 rounded-xl">
@@ -301,20 +303,20 @@ export default async function CityPageEn({ params }: Props) {
                             ))}
                         </div>
 
-                        {/* Nearby Cities */}
+                        {/* Nearby Cities - Internal Linking */}
                         <div className="pt-8 border-t border-white/5">
-                            <h3 className="text-2xl font-bold mb-6 text-center text-gold">Taxi Service in Nearby Cities</h3>
+                            <h3 className="text-2xl font-bold mb-6 text-center text-gold">שירות מוניות ביישובים סמוכים</h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {Object.entries(CITIES)
-                                    .filter(([key, entry]) => entry.en.region === cityData.region && entry.en.name !== cityData.name)
+                                    .filter(([key, entry]) => entry.he.region === cityData.region && entry.he.name !== cityData.name)
                                     .slice(0, 8)
                                     .map(([key, entry]) => (
                                         <Link
                                             key={key}
-                                            href={`/en/taxi-${key}`}
+                                            href={`/taxi-${key}`}
                                             className="bg-white/5 border border-white/10 p-4 rounded-xl text-center text-sm hover:border-gold/50 hover:bg-gold/5 transition-all text-gray-300 hover:text-gold"
                                         >
-                                            Taxi from {entry.en.name}
+                                            מונית מ{entry.he.name}
                                         </Link>
                                     ))}
                             </div>

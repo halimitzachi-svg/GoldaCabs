@@ -25,7 +25,7 @@ export default function AnalyticsLink({
     const handleClick = () => {
         sendGAEvent({
             event: eventName,
-            value: eventParams
+            ...eventParams
         });
     };
 
