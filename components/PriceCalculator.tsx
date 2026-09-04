@@ -57,7 +57,6 @@ export default function PriceCalculator({
 
     // User Details & Form State
     const [name, setName] = useState('');
-    const [phone, setPhone] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<{ origin?: string; name?: string; phone?: string }>({});
 
@@ -248,11 +247,6 @@ export default function PriceCalculator({
 
         if (!name || name.trim().length < 2) {
             newErrors.name = isRTL ? 'נא להזין שם מלא' : 'Name is required';
-        }
-
-        const phoneRegex = /^(?:05[0-9]{8}|\+?[1-9][0-9]{7,14})$/;
-        if (!phone || !phoneRegex.test(phone.replace(/[-\s]/g, ''))) {
-            newErrors.phone = isRTL ? 'מספר טלפון לא תקין' : 'Invalid phone number';
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -668,8 +662,8 @@ export default function PriceCalculator({
                     {t.disclaimer}
                 </p>
 
-                {/* User Details (Name & Phone) */}
-                <div className="space-y-4 pt-2 border-t border-white/5">
+                {/* User Details (Name only - since WhatsApp already provides the client's phone number) */}
+                <div className="pt-2 border-t border-white/5">
                     <div className="space-y-1">
                         <label className="text-xs text-gray-400">{t.full_name}</label>
                         <div className="relative">
@@ -686,24 +680,6 @@ export default function PriceCalculator({
                             <User className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 ${isRTL ? 'left-3' : 'right-3'}`} />
                         </div>
                         {errors.name && <p className="text-red-500 text-xs mt-0.5">{errors.name}</p>}
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="text-xs text-gray-400">{t.phone}</label>
-                        <div className="relative">
-                            <input
-                                type="tel"
-                                value={phone}
-                                onChange={e => {
-                                    setPhone(e.target.value);
-                                    setErrors(prev => ({ ...prev, phone: undefined }));
-                                }}
-                                placeholder="050-0000000"
-                                className={`w-full bg-dark-bg/50 border ${errors.phone ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-2.5 text-white text-sm focus:border-gold/50 outline-none font-mono ${isRTL ? 'pl-9' : 'pr-9'}`}
-                            />
-                            <Phone className={`absolute top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 ${isRTL ? 'left-3' : 'right-3'}`} />
-                        </div>
-                        {errors.phone && <p className="text-red-500 text-xs mt-0.5">{errors.phone}</p>}
                     </div>
                 </div>
 
