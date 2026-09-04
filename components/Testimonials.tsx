@@ -78,7 +78,7 @@ export default function Testimonials({ lang = 'he' }: { lang?: Locale }) {
                                 <span className="text-gray-500 text-sm">({stats.total} ביקורות)</span>
                             </div>
                             <a 
-                                href="https://maps.google.com/?cid=16168621164204710320" 
+                                href="https://search.google.com/local/reviews?placeid=ChIJm2p5dMZxUyERvZHxWhFdf5Y" 
                                 target="_blank" 
                                 rel="noopener noreferrer" 
                                 className="flex items-center gap-1.5 opacity-75 hover:opacity-100 transition-opacity bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/5"

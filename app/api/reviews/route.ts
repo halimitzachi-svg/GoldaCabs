@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const lang = searchParams.get('lang') || 'he';
-    const PLACE_ID = 'ChIJeeRfwMa7HRURsNlIqEh7YuA';
+    const PLACE_ID = 'ChIJm2p5dMZxUyERvZHxWhFdf5Y';
     const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
 
     if (!API_KEY) {
