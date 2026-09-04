@@ -40,10 +40,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             type: 'website',
             images: [
                 {
-                    url: 'https://www.goldacabs.co.il/og-image.png',
-                    secureUrl: 'https://www.goldacabs.co.il/og-image.png',
+                    url: 'https://www.goldacabs.co.il/og-image.jpg',
+                    secureUrl: 'https://www.goldacabs.co.il/og-image.jpg',
                     width: 1200,
                     height: 630,
+                    type: 'image/jpeg',
+                    alt: `Taxi from ${cityData.name} to Ben Gurion Airport | GoldaCabs VIP`,
+                },
+                {
+                    url: 'https://www.goldacabs.co.il/og-image.png',
+                    secureUrl: 'https://www.goldacabs.co.il/og-image.png',
+                    width: 800,
+                    height: 800,
                     type: 'image/png',
                     alt: `Taxi from ${cityData.name} to Ben Gurion Airport | GoldaCabs VIP`,
                 }
@@ -53,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             card: 'summary_large_image',
             title,
             description,
-            images: ['https://www.goldacabs.co.il/og-image.png'],
+            images: ['https://www.goldacabs.co.il/og-image.jpg'],
         },
         keywords: [`taxi from ${cityData.name} to tlv`, `taxi ${cityData.name}`, 'airport transfer israel', 'golda cabs'],
         alternates: {

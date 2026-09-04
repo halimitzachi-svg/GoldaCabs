@@ -17,12 +17,20 @@ export const metadata: Metadata = {
         type: 'website',
         images: [
             {
-                url: 'https://www.goldacabs.co.il/og-image.png',
-                secureUrl: 'https://www.goldacabs.co.il/og-image.png',
+                url: 'https://www.goldacabs.co.il/og-image.jpg',
+                secureUrl: 'https://www.goldacabs.co.il/og-image.jpg',
                 width: 1200,
                 height: 630,
-                type: 'image/png',
+                type: 'image/jpeg',
                 alt: 'GoldaCabs VIP | Premium Airport Taxi to Ben Gurion (TLV)',
+            },
+            {
+                url: 'https://www.goldacabs.co.il/og-image.png',
+                secureUrl: 'https://www.goldacabs.co.il/og-image.png',
+                width: 800,
+                height: 800,
+                type: 'image/png',
+                alt: 'GoldaCabs VIP',
             }
         ]
     },
@@ -30,7 +38,7 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         title: 'GoldaCabs VIP Ben Gurion Airport | 24/7 Premium Transfers',
         description: 'Instant online fare calculator and direct WhatsApp booking. Executive fleet, private chauffeur, and transparent fixed pricing.',
-        images: ['https://www.goldacabs.co.il/og-image.png'],
+        images: ['https://www.goldacabs.co.il/og-image.jpg'],
     },
     alternates: {
         canonical: 'https://www.goldacabs.co.il/en',

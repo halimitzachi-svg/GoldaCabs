@@ -29,12 +29,20 @@ export const metadata: Metadata = {
         type: 'website',
         images: [
             {
-                url: 'https://www.goldacabs.co.il/og-image.png',
-                secureUrl: 'https://www.goldacabs.co.il/og-image.png',
+                url: 'https://www.goldacabs.co.il/og-image.jpg',
+                secureUrl: 'https://www.goldacabs.co.il/og-image.jpg',
                 width: 1200,
                 height: 630,
-                type: 'image/png',
+                type: 'image/jpeg',
                 alt: 'מוניות גולדה VIP | שירות הסעות פרימיום לנתב"ג',
+            },
+            {
+                url: 'https://www.goldacabs.co.il/og-image.png',
+                secureUrl: 'https://www.goldacabs.co.il/og-image.png',
+                width: 800,
+                height: 800,
+                type: 'image/png',
+                alt: 'מוניות גולדה VIP',
             }
         ]
     },
@@ -42,7 +50,7 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         title: 'מוניות גולדה VIP לנתב"ג | שירות הסעות פרימיום 24/7',
         description: 'מחשבון מחיר אונליין והזמנה ישירה בוואטסאפ. נהג אישי, רכבים חדישים ומחיר שקוף ללא הפתעות.',
-        images: ['https://www.goldacabs.co.il/og-image.png'],
+        images: ['https://www.goldacabs.co.il/og-image.jpg'],
     }
 };
 

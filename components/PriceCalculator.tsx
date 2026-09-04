@@ -465,53 +465,59 @@ export default function PriceCalculator({
                 </AnimatePresence>
 
                 {/* Passengers & Luggage Selectors */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-dark-bg/30 border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <Users className="w-5 h-5 text-gray-400" />
-                            <div>
-                                <span className="text-xs text-gray-400 block">{t.passengers}</span>
-                                <span className="font-bold text-white text-lg">{passengers}</span>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    {/* Passengers Card */}
+                    <div className="bg-dark-bg/30 border border-white/5 p-3.5 sm:p-4 rounded-2xl flex flex-col justify-between gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 sm:gap-2.5">
+                                <Users className="w-4 h-4 sm:w-5 sm:h-5 text-gold/80 shrink-0" />
+                                <span className="text-xs text-gray-400 font-medium">{t.passengers}</span>
                             </div>
+                            <span className="font-bold text-white text-base sm:text-lg font-mono">{passengers}</span>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5 pt-2 border-t border-white/5">
                             <button
                                 type="button"
                                 onClick={() => setPassengers(Math.max(1, passengers - 1))}
-                                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+                                className="flex-1 h-8 rounded-lg bg-white/5 hover:bg-white/10 active:scale-95 text-white flex items-center justify-center transition-all border border-white/5"
+                                aria-label="Decrease passengers"
                             >
                                 <Minus className="w-3.5 h-3.5" />
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setPassengers(Math.min(PRICING_CONSTANTS.MAX_PASSENGERS, passengers + 1))}
-                                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+                                className="flex-1 h-8 rounded-lg bg-white/5 hover:bg-white/10 active:scale-95 text-white flex items-center justify-center transition-all border border-white/5"
+                                aria-label="Increase passengers"
                             >
                                 <Plus className="w-3.5 h-3.5" />
                             </button>
                         </div>
                     </div>
 
-                    <div className="bg-dark-bg/30 border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <Briefcase className="w-5 h-5 text-gray-400" />
-                            <div>
-                                <span className="text-xs text-gray-400 block">{t.luggage}</span>
-                                <span className="font-bold text-white text-lg">{luggage}</span>
+                    {/* Luggage Card */}
+                    <div className="bg-dark-bg/30 border border-white/5 p-3.5 sm:p-4 rounded-2xl flex flex-col justify-between gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 sm:gap-2.5">
+                                <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-gold/80 shrink-0" />
+                                <span className="text-xs text-gray-400 font-medium">{t.luggage}</span>
                             </div>
+                            <span className="font-bold text-white text-base sm:text-lg font-mono">{luggage}</span>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5 pt-2 border-t border-white/5">
                             <button
                                 type="button"
                                 onClick={() => setLuggage(Math.max(0, luggage - 1))}
-                                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+                                className="flex-1 h-8 rounded-lg bg-white/5 hover:bg-white/10 active:scale-95 text-white flex items-center justify-center transition-all border border-white/5"
+                                aria-label="Decrease luggage"
                             >
                                 <Minus className="w-3.5 h-3.5" />
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setLuggage(Math.min(PRICING_CONSTANTS.MAX_LUGGAGE, luggage + 1))}
-                                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+                                className="flex-1 h-8 rounded-lg bg-white/5 hover:bg-white/10 active:scale-95 text-white flex items-center justify-center transition-all border border-white/5"
+                                aria-label="Increase luggage"
                             >
                                 <Plus className="w-3.5 h-3.5" />
                             </button>

@@ -28,7 +28,7 @@ export default function Hero({
     const displaySubtitle = customSubtitle || t.subtitle;
 
     return (
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-16 md:py-24">
+        <section className="relative min-h-[calc(100vh-80px)] flex items-start justify-center overflow-hidden pt-24 pb-16 md:pt-28 md:pb-24">
             {/* Background Layer: On subpages use lightweight image/gradient, on Home use DesktopHeroVideo */}
             <div className="absolute inset-x-0 top-0 h-[85vh] overflow-hidden pointer-events-none">
                 <div className="relative w-full h-full">
@@ -56,10 +56,10 @@ export default function Hero({
             </div>
 
             <div className="container mx-auto px-4 relative z-10">
-                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div className="grid lg:grid-cols-2 gap-12 items-start pt-2 lg:pt-4">
 
                     {/* Text Content */}
-                    <div className="space-y-8 text-center lg:text-start" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className="space-y-6 lg:space-y-8 text-center lg:text-start" dir={isRTL ? 'rtl' : 'ltr'}>
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm animate-fade-in mx-auto lg:mx-0">
                             <Star className="w-4 h-4 text-gold fill-gold" />
                             <span className="text-sm font-medium text-gold">

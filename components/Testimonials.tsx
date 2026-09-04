@@ -156,7 +156,21 @@ export default function Testimonials({ lang = 'he' }: { lang?: Locale }) {
                                         </p>
                                     </div>
                                     <div className="flex items-center justify-between border-t border-white/5 pt-4 text-xs text-gray-500">
-                                        <span className="font-semibold text-white">{item.author_name}</span>
+                                        <div className="flex items-center gap-2.5">
+                                            {item.profile_photo_url ? (
+                                                <img
+                                                    src={item.profile_photo_url}
+                                                    alt={item.author_name}
+                                                    className="w-8 h-8 rounded-full border border-gold/30 object-cover"
+                                                    referrerPolicy="no-referrer"
+                                                />
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full bg-gold/10 border border-gold/30 text-gold flex items-center justify-center font-bold text-xs">
+                                                    {item.author_name.charAt(0)}
+                                                </div>
+                                            )}
+                                            <span className="font-semibold text-white">{item.author_name}</span>
+                                        </div>
                                         <span>{item.relative_time_description}</span>
                                     </div>
                                 </motion.div>

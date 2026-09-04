@@ -40,10 +40,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             type: 'website',
             images: [
                 {
-                    url: 'https://www.goldacabs.co.il/og-image.png',
-                    secureUrl: 'https://www.goldacabs.co.il/og-image.png',
+                    url: 'https://www.goldacabs.co.il/og-image.jpg',
+                    secureUrl: 'https://www.goldacabs.co.il/og-image.jpg',
                     width: 1200,
                     height: 630,
+                    type: 'image/jpeg',
+                    alt: `מוניות ${cityData.name} לנתב"ג | מוניות גולדה VIP`,
+                },
+                {
+                    url: 'https://www.goldacabs.co.il/og-image.png',
+                    secureUrl: 'https://www.goldacabs.co.il/og-image.png',
+                    width: 800,
+                    height: 800,
                     type: 'image/png',
                     alt: `מוניות ${cityData.name} לנתב"ג | מוניות גולדה VIP`,
                 }
@@ -53,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             card: 'summary_large_image',
             title,
             description,
-            images: ['https://www.goldacabs.co.il/og-image.png'],
+            images: ['https://www.goldacabs.co.il/og-image.jpg'],
         },
         keywords: [`מונית מ${cityData.name} לנתב"ג`, `מוניות ${cityData.name}`, 'הסעה לנתב"ג', 'מונית גדולה לשדה התעופה', cityData.name],
         alternates: {
