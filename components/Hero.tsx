@@ -34,11 +34,12 @@ export default function Hero({
                 {/* Background Layer: full screen image/video filling 100% of the viewport */}
                 <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
                     <div className="relative w-full h-full">
-                        {/* Dark Overlay for Text Visibility - tuned for vibrant poster visibility */}
-                        <div className="absolute inset-0 bg-black/45 z-10" />
+                        {/* Dark Overlay for Text Visibility */}
+                        <div className="absolute inset-0 bg-black/70 z-10" />
+                        <div className="absolute inset-0 bg-dark-bg/50 z-10 mix-blend-multiply" />
 
                         {/* Smooth Bottom Gradient mask */}
-                        <div className="absolute inset-x-0 bottom-0 h-[35vh] lg:h-[45vh] bg-gradient-to-t from-dark-bg via-dark-bg/85 to-transparent z-20" />
+                        <div className="absolute inset-x-0 bottom-0 h-[35vh] lg:h-[50vh] bg-gradient-to-t from-dark-bg via-dark-bg/90 to-transparent z-20" />
 
                         {/* Background Visual */}
                         {isSubPage ? (
