@@ -29,12 +29,12 @@ export default function HeroVideo() {
 
     return (
         <div className="relative w-full h-full">
-            {/* Always visible poster backdrop to eliminate black flash */}
-            <picture className="absolute inset-0 w-full h-full -z-10 pointer-events-none">
+            {/* Always visible poster backdrop with luxury opacity */}
+            <picture className="absolute inset-0 w-full h-full pointer-events-none">
                 <img
                     src="/hero-poster.webp"
                     alt="GoldaCabs Premium Fleet"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover opacity-80"
                     loading="eager"
                     decoding="async"
                 />
@@ -49,7 +49,7 @@ export default function HeroVideo() {
                     playsInline
                     preload="metadata"
                     poster="/hero-poster.webp"
-                    className="w-full h-full object-cover transition-opacity duration-700 opacity-90"
+                    className="w-full h-full object-cover transition-opacity duration-700 opacity-80 relative z-10"
                     title="GoldaCabs Premium VIP Promo"
                 >
                     <source src="/hero-video.webm" type="video/webm" />

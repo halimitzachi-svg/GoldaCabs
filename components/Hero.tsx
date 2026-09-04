@@ -30,23 +30,22 @@ export default function Hero({
     return (
         <>
             {/* Hero Section: On mobile it is exactly 100dvh full viewport exclusively for Headline, Badge, CTA & 3 Trust Points */}
-            <section className="relative h-[100dvh] max-h-[100dvh] lg:h-auto lg:min-h-[calc(100vh-80px)] flex flex-col justify-between overflow-hidden pt-16 pb-4 sm:pb-6 lg:pt-28 lg:pb-24 w-full max-w-[100vw]">
+            <section className="relative h-[100dvh] max-h-[100dvh] overflow-hidden lg:h-auto lg:max-h-none lg:min-h-screen lg:overflow-visible flex flex-col justify-between pt-16 pb-4 sm:pb-6 lg:pt-28 lg:pb-24 w-full max-w-[100vw]">
                 {/* Background Layer: full screen image/video filling 100% of the viewport */}
                 <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
                     <div className="relative w-full h-full">
-                        {/* Dark Overlay for Text Visibility */}
-                        <div className="absolute inset-0 bg-black/70 z-10" />
-                        <div className="absolute inset-0 bg-dark-bg/50 z-10 mix-blend-multiply" />
+                        {/* Dark Overlay for Text Visibility - tuned for vibrant poster visibility */}
+                        <div className="absolute inset-0 bg-black/45 z-10" />
 
                         {/* Smooth Bottom Gradient mask */}
-                        <div className="absolute inset-x-0 bottom-0 h-[35vh] lg:h-[50vh] bg-gradient-to-t from-dark-bg via-dark-bg/90 to-transparent z-20" />
+                        <div className="absolute inset-x-0 bottom-0 h-[35vh] lg:h-[45vh] bg-gradient-to-t from-dark-bg via-dark-bg/85 to-transparent z-20" />
 
                         {/* Background Visual */}
                         {isSubPage ? (
                             <img
                                 src="/hero-poster.webp"
                                 alt="GoldaCabs Premium Taxi"
-                                className="w-full h-full object-cover opacity-60"
+                                className="w-full h-full object-cover opacity-85"
                                 loading="eager"
                             />
                         ) : (
@@ -57,8 +56,8 @@ export default function Hero({
                     <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#D4AF37_1px,transparent_1px)] [background-size:16px_16px] z-10" />
                 </div>
 
-                <div className="w-full max-w-7xl mx-auto px-4 relative z-10 flex-1 flex flex-col justify-between h-full">
-                    <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start pt-2 lg:pt-4 flex-1 h-full">
+                <div className="w-full max-w-7xl mx-auto px-4 relative z-10 flex-1 flex flex-col justify-between h-full lg:h-auto">
+                    <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start pt-2 lg:pt-4 flex-1 h-full lg:h-auto">
 
                         {/* Hero Main Content (takes exactly 100dvh on mobile with bottom badges) */}
                         <div className="flex flex-col justify-between h-full text-center lg:text-start" dir={isRTL ? 'rtl' : 'ltr'}>
