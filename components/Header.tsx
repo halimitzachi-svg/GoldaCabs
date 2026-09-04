@@ -32,8 +32,8 @@ export default function Header({ lang = 'he' }: { lang: 'he' | 'en' }) {
     }
 
     return (
-        <header className="fixed top-0 inset-x-0 z-50 bg-dark-bg/80 backdrop-blur-md border-b border-white/10 transition-all">
-            <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <header className="fixed top-0 left-0 right-0 w-full max-w-[100vw] z-50 bg-dark-bg/85 backdrop-blur-md border-b border-white/10 transition-all">
+            <div className="w-full max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                 {/* Brand Logo */}
                 <Link
                     href={isHe ? '/' : '/en'}

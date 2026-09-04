@@ -330,12 +330,12 @@ export default function PriceCalculator({
 
     return (
         <div
-            className={`w-full bg-surface/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl relative overflow-visible group ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full bg-surface/80 backdrop-blur-xl border border-white/10 rounded-3xl p-5 sm:p-6 shadow-2xl relative overflow-hidden group ${isRTL ? 'text-right' : 'text-left'}`}
             dir={isRTL ? 'rtl' : 'ltr'}
         >
             {/* Background Glow */}
             <div
-                className={`absolute -top-20 w-40 h-40 bg-gold/20 rounded-full blur-3xl pointer-events-none group-hover:bg-gold/30 transition-all duration-500 overflow-hidden ${isRTL ? '-left-20' : '-right-20'}`}
+                className={`absolute -top-20 w-40 h-40 bg-gold/20 rounded-full blur-3xl pointer-events-none group-hover:bg-gold/30 transition-all duration-500 ${isRTL ? 'left-0' : 'right-0'}`}
             />
 
             <div className="relative z-10 space-y-6">

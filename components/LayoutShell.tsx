@@ -12,15 +12,15 @@ export default function LayoutShell({
     lang: 'he' | 'en';
 }) {
     return (
-        <>
+        <div className="relative min-h-screen w-full max-w-[100vw] overflow-x-clip">
             <Header lang={lang} />
-            <div className="pt-16">
+            <main className="w-full max-w-[100vw] overflow-x-clip">
                 {children}
-            </div>
+            </main>
             <Footer lang={lang} />
             <AccessibilityWidget />
             <PhoneWidget />
             <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ''} />
-        </>
+        </div>
     );
 }
