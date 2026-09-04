@@ -49,10 +49,12 @@ export async function GET(request: Request) {
                             profile_photo_url: r.authorAttribution?.photoUri || '',
                             rating: r.rating || 5,
                             relative_time_description: r.relativePublishTimeDescription || '',
-                            text: reviewText
+                            text: reviewText,
+                            publishTime: r.publishTime || ''
                         };
                     })
-                    .filter((r: any) => r.text && r.text.trim().length > 5);
+                    .filter((r: any) => r.text && r.text.trim().length > 5)
+                    .sort((a: any, b: any) => new Date(b.publishTime).getTime() - new Date(a.publishTime).getTime());
 
                 return NextResponse.json(
                     {
