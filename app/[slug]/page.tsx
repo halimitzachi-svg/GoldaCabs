@@ -100,8 +100,8 @@ export default async function CityPage({ params }: Props) {
         },
         'aggregateRating': {
             '@type': 'AggregateRating',
-            'ratingValue': '4.9',
-            'ratingCount': '124',
+            'ratingValue': '5.0',
+            'ratingCount': '5',
             'bestRating': '5',
             'worstRating': '1'
         }

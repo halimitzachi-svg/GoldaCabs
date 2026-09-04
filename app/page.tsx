@@ -62,10 +62,12 @@ export default function Home() {
     },
     'availableLanguage': ['Hebrew', 'English'],
     'serviceType': 'Airport Shuttle',
+    'paymentAccepted': 'Cash, Bit, Paybox',
+    'currenciesAccepted': 'ILS',
     'aggregateRating': {
       '@type': 'AggregateRating',
-      'ratingValue': '4.9',
-      'ratingCount': '124',
+      'ratingValue': '5.0',
+      'ratingCount': '5',
       'bestRating': '5',
       'worstRating': '1'
     }

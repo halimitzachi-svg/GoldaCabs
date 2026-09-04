@@ -17,80 +17,94 @@ export async function GET(request: Request) {
         const response = await fetch(url, { next: { revalidate: 3600 } }); // Cache for 1 hour
         const data = await response.json();
 
-        if (data.status !== 'OK') {
-            return NextResponse.json({ error: data.status, message: data.error_message }, { status: 400 });
-        }
-
-        // Fallback reviews if Google API returns empty (common issue with under 10 reviews)
+        // Fallback reviews matching verified Google reviews
         const fallbackReviewsHebrew = [
             {
-                author_name: "דוד כהן",
+                author_name: "Eyal Haskal",
                 rating: 5,
-                relative_time_description: "לפני שבוע",
-                text: "שירות מצוין! הנהג הגיע בדיוק בזמן, הרכב היה נקי ומרווח. נסיעה חלקה ורגועה לנתב״ג.",
+                relative_time_description: "לפני 4 שנים",
+                text: "נוסע בקביעות עם מיכאל לנתב\"ג. זהיר ואדיב מאוד. הרכב חדש ותמיד מצוחצח. ממליץ בחום.",
                 profile_photo_url: ""
             },
             {
-                author_name: "שירה לוי",
+                author_name: "Liz Alon",
                 rating: 5,
-                relative_time_description: "לפני שבועיים",
-                text: "הזמנתי מונית הלוך וחזור לשדה התעופה. מחירים הוגנים מאוד ושירות מעל המצופה. הנהג עזר לנו עם המזוודות והיה אדיב לקראתנו לאורך כל הדרך.",
+                relative_time_description: "לפני 3 שנים",
+                text: "הזמנתי מונית לנתב״ג הגיע בדיוק בזמן,שירות אדיב, מונית חדשה אחלה נסיעה מומלץ בחום💗",
                 profile_photo_url: ""
             },
             {
-                author_name: "אילן רוזנר",
+                author_name: "Shula Halimi",
                 rating: 5,
-                relative_time_description: "לפני חודש",
-                text: "זמינות 24/7 באמת עובדת. טיסת הלילה שלנו התעכבה, אבל הנהג חיכה לנו עם חיוך ושילוט. שירות אמין במיוחד!",
+                relative_time_description: "לפני 3 שנים",
+                text: "שירות אדיב, עמידה בלוח הזמנים ומחירים הוגנים.",
                 profile_photo_url: ""
             },
             {
-                author_name: "יעל אברהמי",
+                author_name: "Itay Biton",
                 rating: 5,
-                relative_time_description: "לפני חודשיים",
-                text: "המונית הגיעה בזמן, נהג זהיר ומקצועי. הרכב היה ממוזג היטב ונעים. תודה רבה על שירות מושלם.",
+                relative_time_description: "לפני 4 שנים",
+                text: "שירות אדיב, חדשני ומקצועי. ממליץ בחום!",
+                profile_photo_url: ""
+            },
+            {
+                author_name: "Greek Job",
+                rating: 5,
+                relative_time_description: "לפני 4 שנים",
+                text: "",
                 profile_photo_url: ""
             }
         ];
 
         const fallbackReviewsEnglish = [
             {
-                author_name: "David Cohen",
+                author_name: "Eyal Haskal",
                 rating: 5,
-                relative_time_description: "A week ago",
-                text: "Excellent service! The driver arrived exactly on time, the car was clean and spacious. A smooth ride to the airport.",
+                relative_time_description: "4 years ago",
+                text: "Regularly travel with Michael to Ben Gurion Airport. Very careful and courteous. The car is new and always spotless. Highly recommended.",
                 profile_photo_url: ""
             },
             {
-                author_name: "Shira Levi",
+                author_name: "Liz Alon",
                 rating: 5,
-                relative_time_description: "2 weeks ago",
-                text: "Booked a round trip to the airport. Very fair pricing and service beyond expectations. The driver helped with our luggage.",
+                relative_time_description: "3 years ago",
+                text: "Booked a taxi to the airport, arrived right on time, courteous service, brand new taxi, great ride, highly recommended💗",
                 profile_photo_url: ""
             },
             {
-                author_name: "Ilan Rosner",
+                author_name: "Shula Halimi",
                 rating: 5,
-                relative_time_description: "A month ago",
-                text: "The 24/7 availability is real. Our night flight was delayed but the driver waited for us with a smile. Highly reliable!",
+                relative_time_description: "3 years ago",
+                text: "Courteous service, punctuality and fair prices.",
                 profile_photo_url: ""
             },
             {
-                author_name: "Yael Avrahami",
+                author_name: "Itay Biton",
                 rating: 5,
-                relative_time_description: "2 months ago",
-                text: "Taxi arrived on time, careful and professional driver. Car was well air-conditioned. Thank you for a perfect service.",
+                relative_time_description: "4 years ago",
+                text: "Courteous, innovative and professional service. Highly recommended!",
+                profile_photo_url: ""
+            },
+            {
+                author_name: "Greek Job",
+                rating: 5,
+                relative_time_description: "4 years ago",
+                text: "",
                 profile_photo_url: ""
             }
         ];
 
-        let reviewsToReturn = data.result?.reviews || [];
-        let ratingToReturn = data.result?.rating || 5;
-        let totalRatingsToReturn = data.result?.user_ratings_total || 5;
+        let reviewsToReturn = (data.status === 'OK' && data.result?.reviews?.length) 
+            ? data.result.reviews 
+            : (lang === 'en' ? fallbackReviewsEnglish : fallbackReviewsHebrew);
 
-        if (reviewsToReturn.length === 0) {
-            reviewsToReturn = lang === 'en' ? fallbackReviewsEnglish : fallbackReviewsHebrew;
-        }
+        let ratingToReturn = (data.status === 'OK' && data.result?.rating) 
+            ? data.result.rating 
+            : 5;
+
+        let totalRatingsToReturn = (data.status === 'OK' && data.result?.user_ratings_total) 
+            ? data.result.user_ratings_total 
+            : 5;
 
         return NextResponse.json({
             reviews: reviewsToReturn,
@@ -98,6 +112,20 @@ export async function GET(request: Request) {
             totalRatings: totalRatingsToReturn
         });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to fetch reviews' }, { status: 500 });
+        return NextResponse.json({
+            reviews: lang === 'en' ? [
+                { author_name: "Eyal Haskal", rating: 5, relative_time_description: "4 years ago", text: "Regularly travel with Michael to Ben Gurion Airport. Very careful and courteous. The car is new and always spotless. Highly recommended.", profile_photo_url: "" },
+                { author_name: "Liz Alon", rating: 5, relative_time_description: "3 years ago", text: "Booked a taxi to the airport, arrived right on time, courteous service, brand new taxi, great ride, highly recommended💗", profile_photo_url: "" },
+                { author_name: "Shula Halimi", rating: 5, relative_time_description: "3 years ago", text: "Courteous service, punctuality and fair prices.", profile_photo_url: "" },
+                { author_name: "Itay Biton", rating: 5, relative_time_description: "4 years ago", text: "Courteous, innovative and professional service. Highly recommended!", profile_photo_url: "" }
+            ] : [
+                { author_name: "Eyal Haskal", rating: 5, relative_time_description: "לפני 4 שנים", text: "נוסע בקביעות עם מיכאל לנתב\"ג. זהיר ואדיב מאוד. הרכב חדש ותמיד מצוחצח. ממליץ בחום.", profile_photo_url: "" },
+                { author_name: "Liz Alon", rating: 5, relative_time_description: "לפני 3 שנים", text: "הזמנתי מונית לנתב״ג הגיע בדיוק בזמן,שירות אדיב, מונית חדשה אחלה נסיעה מומלץ בחום💗", profile_photo_url: "" },
+                { author_name: "Shula Halimi", rating: 5, relative_time_description: "לפני 3 שנים", text: "שירות אדיב, עמידה בלוח הזמנים ומחירים הוגנים.", profile_photo_url: "" },
+                { author_name: "Itay Biton", rating: 5, relative_time_description: "לפני 4 שנים", text: "שירות אדיב, חדשני ומקצועי. ממליץ בחום!", profile_photo_url: "" }
+            ],
+            rating: 5,
+            totalRatings: 5
+        });
     }
 }
