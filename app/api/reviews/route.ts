@@ -54,7 +54,14 @@ export async function GET(request: Request) {
                         };
                     })
                     .filter((r: any) => r.text && r.text.trim().length > 5)
-                    .sort((a: any, b: any) => new Date(b.publishTime).getTime() - new Date(a.publishTime).getTime());
+                    .sort((a: any, b: any) => {
+                        // 1. Prioritize 5-star reviews first
+                        if ((b.rating || 5) !== (a.rating || 5)) {
+                            return (b.rating || 5) - (a.rating || 5);
+                        }
+                        // 2. Then newest first
+                        return new Date(b.publishTime).getTime() - new Date(a.publishTime).getTime();
+                    });
 
                 return NextResponse.json(
                     {
