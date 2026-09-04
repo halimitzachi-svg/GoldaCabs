@@ -8,7 +8,7 @@ import {
     Users, Briefcase, Clock,
     MapPin, CheckCircle2, Plane, Car, Plus, Minus, Info, Search, Loader2, User, Phone
 } from 'lucide-react';
-import { CITIES_DATA, PRICING_CONSTANTS, type CityData } from '@/data/cities';
+import { CITIES_DATA, PRICING_CONSTANTS, getDistanceMultiplier, type CityData } from '@/data/cities';
 import { dictionary, Locale } from '@/lib/dictionary';
 
 const libraries: Libraries = ["places"];
@@ -23,6 +23,7 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
     });
 
     const [originName, setOriginName] = useState('');
+    const [cityName, setCityName] = useState('');
     const [distanceKm, setDistanceKm] = useState<number>(0);
     const [passengers, setPassengers] = useState(1);
     const [luggage, setLuggage] = useState(1);
@@ -68,13 +69,22 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
         if (autocompleteRef.current) {
             const place = autocompleteRef.current.getPlace();
             if (place.geometry && place.geometry.location) {
-                const name = place.name || place.formatted_address || '';
-                setOriginName(name);
-
-                // Detect Region
                 const addressComponents = place.address_components || [];
                 const fullName = place.name || '';
                 const fullAddress = place.formatted_address || '';
+
+                // Extract City Name
+                const cityComp = addressComponents.find(c =>
+                    c.types.includes('locality') ||
+                    c.types.includes('sublocality') ||
+                    c.types.includes('administrative_area_level_2')
+                );
+                const extractedCity = cityComp ? cityComp.long_name : '';
+                setCityName(extractedCity);
+
+                // Set full display address
+                const displayName = fullAddress || (extractedCity ? `${fullName}, ${extractedCity}` : fullName);
+                setOriginName(displayName);
 
                 let detectedRegion = 'north'; // Default
 
@@ -195,8 +205,8 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
 
         const vehicleMultiplier = vehicleConfig.multiplier;
 
-        // Apply Regional Multiplier
-        const regionMultiplier = (PRICING_CONSTANTS.REGION_MULTIPLIERS as any)[activeRegion] || 1.0;
+        // Apply Dynamic Distance-Based Multiplier (Closer to airport = higher factor, min bound 1.3)
+        const regionMultiplier = getDistanceMultiplier(distanceKm);
 
         // Base Calculations
         const distancePrice = distanceKm * kmRate * vehicleMultiplier * regionMultiplier;
@@ -268,6 +278,9 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
         setErrors({});
         setIsSubmitting(true);
 
+        const derivedCity = cityName || (originName.includes(',') ? originName.split(',').slice(-2, -1)[0]?.trim() : '');
+        const displayCity = derivedCity || originName;
+
         const message = t.whatsapp_msg
             .replace('{0}', name)
             .replace('{1}', originName)
@@ -278,7 +291,8 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
             .replace('{6}', price.toString())
             .replace('{7}', babySeat ? (lang === 'he' ? 'כן' : 'Yes') : (lang === 'he' ? 'לא' : 'No'))
             .replace('{8}', useRoute6 ? (lang === 'he' ? 'כן' : 'Yes') : (lang === 'he' ? 'לא' : 'No'))
-            .replace('{9}', recommendedPickupTime);
+            .replace('{9}', recommendedPickupTime)
+            .replace('{10}', displayCity);
 
         const encodedMessage = encodeURIComponent(message);
 
@@ -327,13 +341,16 @@ export default function PriceCalculator({ lang = 'he' }: { lang?: Locale }) {
                             <Autocomplete
                                 onLoad={onLoad}
                                 onPlaceChanged={onPlaceChanged}
-                                fields={["geometry.location", "formatted_address", "name"]}
+                                fields={["geometry.location", "formatted_address", "name", "address_components"]}
                             >
                                 <input
                                     type="text"
                                     placeholder={t.pickup_placeholder}
                                     className={`w-full bg-dark-bg/50 border ${errors.origin ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:border-gold/50 outline-none placeholder:text-gray-600 ${isRTL ? 'pl-10' : 'pr-10'}`}
-                                    onChange={() => setErrors({ ...errors, origin: undefined })}
+                                    onChange={(e) => {
+                                        setOriginName(e.target.value);
+                                        setErrors({ ...errors, origin: undefined });
+                                    }}
                                 />
                             </Autocomplete>
                         ) : (

@@ -217,7 +217,7 @@ export default async function CityPageEn({ params }: Props) {
                             </div>
 
                             <div className="bg-gold/10 p-6 rounded-2xl border border-gold/20 my-8">
-                                <h3 className="text-xl font-bold text-gold mb-4 text-center">Estimated Price Guide: {cityData.name} - TLV</h3>
+                                <h3 className="text-xl font-bold text-gold mb-4 text-center">Non-Final Price Guide: {cityData.name} - TLV</h3>
                                 <div className="space-y-3 font-sans">
                                     <div className="flex justify-between border-b border-gold/10 pb-2">
                                         <span>Standard Taxi (Up to 4 Pax)</span>

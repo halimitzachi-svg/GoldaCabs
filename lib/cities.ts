@@ -1,4 +1,4 @@
-import { PRICING_CONSTANTS } from '@/data/cities';
+import { PRICING_CONSTANTS, getDistanceMultiplier } from '@/data/cities';
 
 export type CityData = {
     name: string;
@@ -20,13 +20,12 @@ const calculateDuration = (distanceKm: number, lang: 'he' | 'en') => {
     return lang === 'he' ? `${rounded} דק׳` : `${rounded} min`;
 };
 
-// Helper function to calculate price based on distance and region
+// Helper function to calculate price based on distance and dynamic multiplier
 const calculatePrice = (distanceKm: number, region: string = 'central') => {
-    const multipliers = PRICING_CONSTANTS.REGION_MULTIPLIERS as Record<string, number>;
-    const multiplier = multipliers[region] || 1.0;
+    const multiplier = getDistanceMultiplier(distanceKm);
 
     const baseFare = PRICING_CONSTANTS.START_PRICE + (distanceKm * PRICING_CONSTANTS.KILOMETER_RATE_TARIFF_1);
-    const totalWithMultiplier = baseFare * multiplier;
+    const totalWithMultiplier = (baseFare * multiplier) + PRICING_CONSTANTS.AIRPORT_FEE;
 
     const rounded = Math.ceil(totalWithMultiplier / 10) * 10; // Round to nearest 10 for clean display
     return rounded.toString();
@@ -69,15 +68,12 @@ export const CITIES: Record<string, CityEntry> = {
     'givatayim': createCity('גבעתיים', 'Givatayim', 24, 'central'),
     'bnei-brak': createCity('בני ברק', 'Bnei Brak', 20, 'central'),
     'kiryat-ono': createCity('קריית אונו', 'Kiryat Ono', 18, 'central'),
-    'yehud': createCity('יהוד', 'Yehud', 12, 'central'),
     'ness-ziona': createCity('נס ציונה', 'Ness Ziona', 25, 'south'),
     'beer-sheva': createCity('באר שבע', 'Beer Sheva', 110, 'south'),
     'haifa': createCity('חיפה', 'Haifa', 110, 'north'),
     'caesarea': createCity('קיסריה', 'Caesarea', 65, 'north'),
     'hadera': createCity('חדרה', 'Hadera', 65, 'north'),
     'zikhron-yaakov': createCity('זכרון יעקב', 'Zikhron Yaakov', 80, 'north'),
-    'shoham': createCity('שוהם', 'Shoham', 8, 'central'),
-    'or-yehuda': createCity('אור יהודה', 'Or Yehuda', 14, 'central'),
     'ganei-tikva': createCity('גני תקווה', 'Ganei Tikva', 19, 'central'),
     'even-yehuda': createCity('אבן יהודה', 'Even Yehuda', 45, 'sharon'),
     'kadima-tzoran': createCity('קדימה-צורן', 'Kadima-Zoran', 42, 'sharon'),

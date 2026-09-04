@@ -29,23 +29,24 @@ export const dictionary = {
             shabbat_tariff: "תעריף שבת/חג שיא כלול (ג')",
             route6_fee: "תוספת כביש 6",
             baby_seat_fee: "תוספת כסא תינוק",
-            total: "סה\"כ לתשלום (משוער)",
+            total: "סה\"כ לתשלום (לא סופי)",
             vat_included: "כולל מע\"מ",
             submit_btn: "הזמן מונית בוואטסאפ",
             submitting: "מכין להזמנה...",
             loading_map: "טוען מפות...",
             error_details: "נא למלא שם וטלפון תקינים",
-            disclaimer: "* המחיר המוצג הינו הערכה משוערת בלבד המבוססת על נתוני הנסיעה, ואינו מהווה מחיר סופי מחייב.",
+            disclaimer: "* המחיר המוצג הינו להערכה ראשונית בלבד ואינו סופי, ואינו מהווה מחיר מחייב.",
             whatsapp_msg: `היי מוניות גולדה, אשמח להזמין מונית.
 שם: {0}
-מאיפה: {1}
+עיר: {10}
+כתובת איסוף: {1}
 מועד: {2}
 מספר טיסה: {3}
 נוסעים: {4}
 מזוודות: {5}
 כסא תינוק: {7}
 כביש 6: {8}
-מחיר משוער באתר: {6}₪`
+מחיר לא סופי באתר: {6}₪`
         },
         city_page: {
             title: "מונית מ{city} לנתב\"ג",
@@ -135,23 +136,24 @@ export const dictionary = {
             shabbat_tariff: 'Shabbat Peak Rate Included (C)',
             route6_fee: 'Highway 6 Toll',
             baby_seat_fee: 'Baby Seat Fee',
-            total: 'Total Estimated Price',
+            total: 'Total Non-Final Price',
             vat_included: 'VAT Included',
             submit_btn: 'Book Taxi Now',
             submitting: 'Booking...',
             loading_map: 'Loading Maps...',
             error_details: 'Please fill name and phone to book',
-            disclaimer: "* The price shown is an estimate based on your trip data and is not a final binding price.",
+            disclaimer: "* The price shown is an initial non-final estimate based on your trip data and is not a binding final price.",
             whatsapp_msg: `Hi GoldaCabs, I'd like to book a taxi.
 Name: {0}
-From: {1}
+City: {10}
+Pickup Address: {1}
 Time: {2}
 Flight No: {3}
 Passengers: {4}
 Luggage: {5}
 Baby Seat: {7}
 Highway 6: {8}
-Estimated Website Price: {6}ILS`
+Non-Final Website Price: {6}ILS`
         },
         city_page: {
             title_prefix: 'Taxi from',

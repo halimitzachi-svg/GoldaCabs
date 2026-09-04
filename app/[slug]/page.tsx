@@ -216,7 +216,7 @@ export default async function CityPage({ params }: Props) {
                             </div>
 
                             <div className="bg-gold/10 p-6 rounded-2xl border border-gold/20 my-8">
-                                <h3 className="text-xl font-bold text-gold mb-4 text-center">מחירון משוער ממוצע: {cityData.name} - נתב"ג</h3>
+                                <h3 className="text-xl font-bold text-gold mb-4 text-center">מחירון לא סופי: {cityData.name} - נתב"ג</h3>
                                 <div className="space-y-3">
                                     <div className="flex justify-between border-b border-gold/10 pb-2">
                                         <span>מונית ספיישל (עד 4 נוסעים)</span>

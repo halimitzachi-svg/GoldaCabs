@@ -14,8 +14,8 @@ export default function Footer() {
             ? { title: 'Sharon Area', keys: ['raanana', 'herzliya', 'kfar-saba', 'hod-hasharon', 'netanya', 'tel-mond', 'even-yehuda'] }
             : { title: 'אזור השרון', keys: ['raanana', 'herzliya', 'kfar-saba', 'hod-hasharon', 'netanya', 'tel-mond', 'even-yehuda'] },
         center: isEn
-            ? { title: 'Central District', keys: ['tel-aviv', 'petah-tikva', 'ramat-gan', 'rishon-lezion', 'holon', 'bat-yam', 'shoham'] }
-            : { title: 'מרכז וגוש דן', keys: ['tel-aviv', 'petah-tikva', 'ramat-gan', 'rishon-lezion', 'holon', 'bat-yam', 'shoham'] },
+            ? { title: 'Central District', keys: ['tel-aviv', 'petah-tikva', 'ramat-gan', 'rishon-lezion', 'holon', 'bat-yam', 'kiryat-ono'] }
+            : { title: 'מרכז וגוש דן', keys: ['tel-aviv', 'petah-tikva', 'ramat-gan', 'rishon-lezion', 'holon', 'bat-yam', 'kiryat-ono'] },
         north: isEn
             ? { title: 'North & Haifa', keys: ['haifa', 'hadera', 'zikhron-yaakov', 'nahariya', 'akko', 'caesarea', 'tiberias'] }
             : { title: 'צפון וחיפה', keys: ['haifa', 'hadera', 'zikhron-yaakov', 'nahariya', 'akko', 'caesarea', 'tiberias'] },

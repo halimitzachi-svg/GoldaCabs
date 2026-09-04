@@ -6,11 +6,7 @@ export type CityData = {
 
 export const CITIES_DATA: CityData[] = [
     // Central District (Gush Dan / Sharon)
-    { name: 'שוהם', distanceKm: 8, tollRoadAvailable: false },
-    { name: 'לוד', distanceKm: 12, tollRoadAvailable: false },
     { name: 'רמלה', distanceKm: 15, tollRoadAvailable: false },
-    { name: 'יהוד-מונוסון', distanceKm: 12, tollRoadAvailable: false },
-    { name: 'אור יהודה', distanceKm: 14, tollRoadAvailable: false },
     { name: 'קריית אונו', distanceKm: 18, tollRoadAvailable: false },
     { name: 'גני תקווה', distanceKm: 19, tollRoadAvailable: false },
     { name: 'סביון', distanceKm: 16, tollRoadAvailable: false },
@@ -27,7 +23,6 @@ export const CITIES_DATA: CityData[] = [
     { name: 'פתח תקווה', distanceKm: 22, tollRoadAvailable: false },
     { name: 'ראש העין', distanceKm: 28, tollRoadAvailable: true },
     { name: 'אלעד', distanceKm: 22, tollRoadAvailable: true },
-
     // Sharon Area
     { name: 'רמת השרון', distanceKm: 30, tollRoadAvailable: false },
     { name: 'הרצליה', distanceKm: 32, tollRoadAvailable: false },
@@ -70,10 +65,10 @@ export const CITIES_DATA: CityData[] = [
 ];
 
 export const PRICING_CONSTANTS = {
-    KILOMETER_RATE_TARIFF_1: 3.5, // Day
-    KILOMETER_RATE_TARIFF_2: 4.2, // Night/Weekend
-    KILOMETER_RATE_TARIFF_3: 4.8, // Shabbat Peak (Fri 21:00 - Sun 06:00)
-    START_PRICE: 11.0,
+    KILOMETER_RATE_TARIFF_1: 3.21, // Day (April 2026 rates)
+    KILOMETER_RATE_TARIFF_2: 3.54, // Night/Weekend (April 2026 rates)
+    KILOMETER_RATE_TARIFF_3: 3.87, // Shabbat Peak (April 2026 rates)
+    START_PRICE: 10.56,
     AIRPORT_FEE: 5.0,
     SUITCASE_PRICE: 0, // No extra charge per suitcase
     ROUTE_6_PRICE: 35.0, // Avg toll
@@ -89,12 +84,31 @@ export const PRICING_CONSTANTS = {
         { maxPassengers: 20, maxLuggage: 20, nameHe: 'מיניבוס VIP (20)', nameEn: 'VIP Minibus (20)', multiplier: 2.6 },
     ],
 
-    // Regional Adjustments (Multipliers for KM rate)
+    // Regional Adjustments (Multipliers for KM rate to reach target market rates)
     REGION_MULTIPLIERS: {
-        'central': 1.6,    // Gush Dan
-        'sharon': 1.5,     // Sharon Area
-        'north': 1.05,      // Base (Haifa & North) - per your request
-        'south': 2,      // Southern District
-        'jerusalem': 1.52,  // Jerusalem
+        'central': 2.65,    // Gush Dan (Tel Aviv -> 250₪)
+        'sharon': 2.0,      // Sharon Area (Netanya -> 350₪)
+        'north': 1.35,      // North (Haifa -> 500₪)
+        'south': 2.0,       // Southern District (Ashdod -> 350₪)
+        'jerusalem': 1.9,   // Jerusalem (~370₪)
     }
 };
+
+/**
+ * Dynamic Multiplier based on Distance to Ben Gurion Airport:
+ * - Closer distances receive higher factor (e.g. 25km Tel Aviv = 2.65 -> 250₪)
+ * - Medium distances smoothly scale (e.g. 50km Netanya = 2.0 -> 350₪)
+ * - Far distances smoothly decrease to minimum bound of 1.3 (e.g. 110km Haifa = 1.35 -> 500₪, minimum floor 1.3)
+ */
+export function getDistanceMultiplier(distanceKm: number): number {
+    if (distanceKm <= 0) return 2.65;
+    if (distanceKm <= 25) {
+        return Math.max(2.65, 2.65 + (25 - distanceKm) * 0.025);
+    } else if (distanceKm <= 50) {
+        return 2.65 - (distanceKm - 25) * (0.65 / 25);
+    } else if (distanceKm <= 110) {
+        return 2.0 - (distanceKm - 50) * (0.65 / 60);
+    } else {
+        return Math.max(1.30, 1.35 - (distanceKm - 110) * 0.001);
+    }
+}
