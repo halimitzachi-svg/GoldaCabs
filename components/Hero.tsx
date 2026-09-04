@@ -34,27 +34,29 @@ export default function Hero({
                 {/* Background Layer: full screen image/video filling 100% of the viewport */}
                 <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
                     <div className="relative w-full h-full">
-                        {/* Dark Overlay for Text Visibility */}
-                        <div className="absolute inset-0 bg-black/70 z-10" />
-                        <div className="absolute inset-0 bg-dark-bg/50 z-10 mix-blend-multiply" />
+                        {/* 1. Background Visual (Video/Poster) at the very back (z-0) */}
+                        <div className="absolute inset-0 w-full h-full z-0">
+                            {isSubPage ? (
+                                <img
+                                    src="/hero-poster.webp"
+                                    alt="GoldaCabs Premium Taxi"
+                                    className="w-full h-full object-cover opacity-85"
+                                    loading="eager"
+                                />
+                            ) : (
+                                <HeroVideo />
+                            )}
+                        </div>
 
-                        {/* Smooth Bottom Gradient mask */}
-                        <div className="absolute inset-x-0 bottom-0 h-[35vh] lg:h-[50vh] bg-gradient-to-t from-dark-bg via-dark-bg/90 to-transparent z-20" />
+                        {/* 2. Dark Overlay for Text Visibility (z-10, on top of video & poster) */}
+                        <div className="absolute inset-0 bg-black/75 z-10" />
+                        <div className="absolute inset-0 bg-dark-bg/60 z-10 mix-blend-multiply" />
 
-                        {/* Background Visual */}
-                        {isSubPage ? (
-                            <img
-                                src="/hero-poster.webp"
-                                alt="GoldaCabs Premium Taxi"
-                                className="w-full h-full object-cover opacity-85"
-                                loading="eager"
-                            />
-                        ) : (
-                            <HeroVideo />
-                        )}
+                        {/* 3. Smooth Bottom Gradient mask (z-20) */}
+                        <div className="absolute inset-x-0 bottom-0 h-[35vh] lg:h-[50vh] bg-gradient-to-t from-dark-bg via-dark-bg/95 to-transparent z-20" />
                     </div>
 
-                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#D4AF37_1px,transparent_1px)] [background-size:16px_16px] z-10" />
+                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#D4AF37_1px,transparent_1px)] [background-size:16px_16px] z-25" />
                 </div>
 
                 <div className="w-full max-w-7xl mx-auto px-4 relative z-10 flex-1 flex flex-col justify-between h-full lg:h-auto">

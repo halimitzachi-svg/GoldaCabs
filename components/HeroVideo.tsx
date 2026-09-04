@@ -49,7 +49,7 @@ export default function HeroVideo() {
                     playsInline
                     preload="metadata"
                     poster="/hero-poster.webp"
-                    className="w-full h-full object-cover transition-opacity duration-700 opacity-80 relative z-10"
+                    className="w-full h-full object-cover transition-opacity duration-700 opacity-80"
                     title="GoldaCabs Premium VIP Promo"
                 >
                     <source src="/hero-video.webm" type="video/webm" />
